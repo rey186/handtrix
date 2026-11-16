@@ -3037,6 +3037,13 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 @keyframes hmWdBn{0%,100%{transform:rotate(0)}30%{transform:rotate(-4deg)}70%{transform:rotate(4deg)}}
 .hm-fd img{display:block;width:100%;height:auto}
 </style>
+<style id="loginCss">
+#loginModal { position:fixed; inset:0; z-index:1310; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(3,3,17,.88); } #loginModal[hidden] { display:none; }
+.lg-box { width:min(100%,380px); padding:22px 16px 14px; text-align:center; border-radius:20px; border:2px solid rgba(110,230,255,.7); background:radial-gradient(90% 50% at 50% 0%,rgba(80,200,255,.25),transparent),#100c2a; box-shadow:0 0 30px rgba(80,200,255,.3); display:flex; flex-direction:column; align-items:center; gap:10px; }
+.lg-box h2 { margin:0; font-size:19px; letter-spacing:.1em; color:#c9f3ff; } .lg-box p { margin:0; color:#c9c2ee; font-size:13px; line-height:1.4; }
+#lgGBtn { min-height:44px; display:flex; justify-content:center; max-width:100%; overflow:hidden; }
+.lg-never { background:none; border:0; color:#8f88b8; font:inherit; font-size:11px; text-decoration:underline; cursor:pointer; padding:6px; }
+</style>
 </head>
 <!-- V16: misiones por partida, bonus de puntos y progresión visible; conserva controles y biomas de V15. -->
 <body>
@@ -3138,6 +3145,9 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <p class="cs-keyboard"><b>También podés usar el teclado:</b> ← → mover · ↑ o X girar · Z giro inverso · ↓ bajar · Espacio caer · C/Shift guardar · E poder · P pausa.</p>
         <button class="btn ghost small" id="csCancel" style="margin-top:6px">Cancelar</button>
       </div>
+  </div>
+  <div id="loginModal" hidden role="dialog" aria-modal="true" aria-label="Iniciar sesión">
+    <div class="lg-box"><h2>☁️ GUARDÁ TU PROGRESO</h2><p>Entrá con Google para tener tu nombre en el ranking y recuperar tu progreso en cualquier celu.</p><div id="lgGBtn"></div><small id="lgMsg" class="cfg-msg"></small><button class="btn ghost small" id="lgSkip">Ahora no</button><button class="lg-never" id="lgNever">No volver a mostrar</button></div>
   </div>
   <div id="dailyModal" hidden role="dialog" aria-modal="true" aria-label="Recompensa diaria">
     <div class="dm-box"><h2>🎁 RECOMPENSA DIARIA</h2><p id="dmSub"></p><div class="dm-days" id="dmDays"></div><div class="dm-reward" id="dmReward"></div><button class="btn big" id="dmClaim">RECLAMAR</button></div>
@@ -5037,7 +5047,7 @@ function menuMusicSync() {
   const hm = $("hubMusic"); if (hm) { hm.classList.toggle("off", !menuMusicOn); hm.innerHTML = menuMusicOn ? `<svg class="msv" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zm11-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></svg>` : `<svg class="msv" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/></svg>`; }
   try { if (audioUnlocked && menuMusicOn && !$("menu").hidden && !document.body.classList.contains("inhome")) audio.menuStart(); else audio.menuStop(); } catch (e) { }
 }
-setTimeout(() => { try { dailyLoginCheck(); } catch (e) { } }, 900);
+setTimeout(() => { try { if (loginPanelNeeded()) loginPanelShow(() => { try { dailyLoginCheck(); } catch (e) { } }); else dailyLoginCheck(); } catch (e) { } }, 900);
 ["pointerdown", "touchend", "click"].forEach(ev => document.addEventListener(ev, function f() { if (audioUnlocked) return; audioUnlocked = true; try { audio.init(); } catch (e) { } menuMusicSync(); }, { passive: true }));
 new MutationObserver(menuMusicSync).observe($("menu"), { attributes: true, attributeFilter: ["hidden"] });
 $("hubMusic").onclick = e => { e.stopPropagation(); menuMusicOn = !menuMusicOn; store.set(MENUMUSIC_KEY, menuMusicOn ? "1" : "0"); audioUnlocked = true; try { audio.init(); } catch (er) { } menuMusicSync(); };
@@ -10185,7 +10195,7 @@ function setOnlineStatus(message, kind = "") {
   const el = $("onlineStatus"); if (!el) return;
   el.textContent = message; el.className = kind;
 }
-const API_URL_KEY = "handtrix-api-url", ACCT_KEY = "handtrix-account-v1";
+const API_URL_KEY = "handtrix-api-url", ACCT_KEY = "handtrix-account-v1", LOGINSKIP_KEY = "handtrix-login-skip-v1";
 function apiBase() { let u = ""; try { u = localStorage.getItem(API_URL_KEY) || ""; } catch (e) { } u = (u || ONLINE_CONFIG.apiUrl || "").trim().replace(/\/+$/, ""); return /^https?:\/\/[^\s]+$/.test(u) ? u : ""; }
 function onlineConfigured() { return !!apiBase(); }
 function acctGet() { try { const o = JSON.parse(localStorage.getItem(ACCT_KEY) || "null"); return o && o.token ? o : null; } catch (e) { return null; } }
@@ -10984,7 +10994,7 @@ function startCountdown() {
 }
 
 // ---------- Cuenta online: ranking global, progreso en la nube y temporada remota ----------
-const ACCT_NOSYNC = [API_URL_KEY, ACCT_KEY];
+const ACCT_NOSYNC = [API_URL_KEY, ACCT_KEY, LOGINSKIP_KEY];
 function acctMsg(t, ok = true) { const el = $("acctMsg"); if (el) { el.textContent = t; el.style.color = ok ? "#7dffb0" : "#ff8a8a"; } }
 function acctRender() {
   const a = acctGet(), u = $("apiUrl"), n = $("acctName"); if (!u || !n) return;
@@ -11037,21 +11047,41 @@ async function googleCredential(resp) {
   if (!resp || !resp.credential) return;
   try {
     const a = acctGet();
-    if (a) { await apiFetch("/link/google", { method: "POST", body: { credential: resp.credential } }); acctMsg("Google vinculado a " + a.name + ". Ya podés entrar con Google desde otro celu."); return; }
+    if (a) { await apiFetch("/link/google", { method: "POST", body: { credential: resp.credential } }); acctMsg("Google vinculado a " + a.name + ". Ya podés entrar con Google desde otro celu."); $("acctGBtn").replaceChildren(); if (!$("loginModal").hidden) loginPanelClose(); return; }
     const nm = ($("acctName").value || "").trim() || getPlayerName() || "Jugador";
     const r = await apiFetch("/login/google", { method: "POST", noAuth: true, body: { credential: resp.credential, name: nm } });
     acctSet({ token: r.token, code: r.code, name: r.name }); acctRender();
     acctMsg(r.created ? `Cuenta creada con Google: ${r.name}.` : `Bienvenido de nuevo, ${r.name}. Tocá ⬇ Restaurar para traer tu progreso.`);
-    fetchSeason();
-  } catch (e) { acctMsg("No se pudo entrar con Google: " + (e.message || "error"), false); }
+    fetchSeason(); $("acctGBtn").replaceChildren(); if (!$("loginModal").hidden) loginPanelClose();
+  } catch (e) { acctMsg("No se pudo entrar con Google: " + (e.message || "error"), false); try { $("lgMsg").textContent = "No se pudo entrar: " + (e.message || "error"); } catch (er) { } }
 }
+let gisInited = false;
+async function googleReady() {
+  await gisLoad();
+  if (!gisInited) { google.accounts.id.initialize({ client_id: ONLINE_CONFIG.googleClientId, callback: googleCredential, auto_select: false }); gisInited = true; }
+}
+// Panel de inicio de sesión (aparece al abrir el juego si no hay cuenta; antes de la recompensa diaria)
+let loginPanelAfter = null;
+function loginPanelNeeded() {
+  try {
+    if (!ONLINE_CONFIG.googleClientId || !apiBase() || acctGet()) return false;
+    const v = store.get(LOGINSKIP_KEY); if (v === "never") return false; if (v && Date.now() < +v) return false; return true;
+  } catch (e) { return false; }
+}
+function loginPanelClose() { $("loginModal").hidden = true; const f = loginPanelAfter; loginPanelAfter = null; if (f) f(); }
+async function loginPanelShow(after) {
+  loginPanelAfter = after || null; $("loginModal").hidden = false; $("lgMsg").textContent = "";
+  try { await googleReady(); $("lgGBtn").replaceChildren(); google.accounts.id.renderButton($("lgGBtn"), { type: "standard", theme: "filled_black", size: "large", text: "continue_with", shape: "pill", locale: "es" }); }
+  catch (e) { $("lgGBtn").textContent = "Google no disponible sin conexión."; }
+}
+$("lgSkip").onclick = () => { store.set(LOGINSKIP_KEY, String(Date.now() + 3 * 864e5)); loginPanelClose(); };
+$("lgNever").onclick = () => { store.set(LOGINSKIP_KEY, "never"); loginPanelClose(); };
 async function googleInit() {
   const id = ONLINE_CONFIG.googleClientId, box = $("acctGoogle"); if (!box) return;
   if (!id || !apiBase()) { box.hidden = true; return; }
   box.hidden = false;
   try {
-    await gisLoad();
-    google.accounts.id.initialize({ client_id: id, callback: googleCredential, auto_select: false });
+    await googleReady();
     $("acctGBtn").replaceChildren(); google.accounts.id.renderButton($("acctGBtn"), { type: "standard", theme: "filled_black", size: "large", text: "continue_with", shape: "pill", locale: "es" });
   } catch (e) { $("acctGBtn").textContent = "Google no disponible sin conexión."; }
 }
