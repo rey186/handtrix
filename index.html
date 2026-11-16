@@ -3466,6 +3466,8 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <div class="cfg-two"><button class="btn small" id="acctConnect">Conectar / crear cuenta</button><button class="btn ghost small" id="acctShow">Ver mi código</button></div>
         <div class="cfg-two"><button class="btn ghost small" id="acctUp">⬆ Guardar en la nube</button><button class="btn ghost small" id="acctDown">⬇ Restaurar</button></div>
         <button class="btn ghost small" id="acctLogin">Recuperar cuenta con código</button>
+        <div id="acctGoogle" hidden><small class="cfg-note" style="display:block;margin:6px 0 4px">O entrá con Google (sirve para volver a tu cuenta desde otro celu):</small><div id="acctGBtn" style="min-height:44px"></div></div>
+        <button class="btn ghost small" id="acctDelete">Eliminar mi cuenta online</button>
         <label class="cfg-row cfg-tg"><span class="cfg-lab"><small style="margin:0;font-size:12px">Guardar el progreso solo al terminar cada partida</small></span><input id="acctAuto" type="checkbox" checked></label>
         <small id="acctMsg" class="cfg-msg"></small>
       </section>
@@ -3658,7 +3660,7 @@ const BESTKEY = "tetris-manos-best", CALKEY = "tetris-manos-cal";
 const PERFORMANCE_KEY = "tetrisHandsPerformanceV20";
 // Configurar con los datos PÚBLICOS del proyecto Supabase. Nunca colocar una service_role key aquí.
 // Base de datos global: servidor Flask (carpeta handtrix-server). Pegá la URL acá o en Ajustes → ☁️ Cuenta online.
-const ONLINE_CONFIG = Object.freeze({ apiUrl: "https://jotototrszuuuxpjsuyy.supabase.co/functions/v1/handtrix" });   // ej.: "https://tu-servidor.com"
+const ONLINE_CONFIG = Object.freeze({ apiUrl: "https://jotototrszuuuxpjsuyy.supabase.co/functions/v1/handtrix", googleClientId: "23245304941-jqkspsvh56ekl1hsvpu2n42fainud4kq.apps.googleusercontent.com" });   // ej.: "https://tu-servidor.com"
 const ACHKEY = "tetris-manos-ach", SCOREKEY = "tetris-manos-scores", SKINKEY = "tetris-manos-skin", CAREERKEY = "tetris-manos-career-v18";
 const SEASON_KEY = "tetris-manos-season-v18";
 const PLAYER_NAME_KEY = "tetris-manos-player-name-v21";
@@ -11025,6 +11027,40 @@ $("acctLogin").onclick = async () => {
   try { const r = await apiFetch("/login", { method: "POST", noAuth: true, body: { code } }); acctSet({ token: r.token, code: r.code, name: r.name }); acctRender(); acctMsg("Cuenta recuperada: " + r.name + ". Tocá ⬇ Restaurar para traer tu progreso."); }
   catch (e) { acctMsg("No se pudo: " + (e.message || "error"), false); }
 };
+// Login con Google (Google Identity Services). Solo aparece si ONLINE_CONFIG.googleClientId está configurado.
+let gisLoading = null;
+function gisLoad() {
+  if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  return gisLoading || (gisLoading = new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://accounts.google.com/gsi/client"; sc.async = true; sc.onload = ok; sc.onerror = () => { gisLoading = null; no(new Error("no se pudo cargar Google")); }; document.head.appendChild(sc); }));
+}
+async function googleCredential(resp) {
+  if (!resp || !resp.credential) return;
+  try {
+    const a = acctGet();
+    if (a) { await apiFetch("/link/google", { method: "POST", body: { credential: resp.credential } }); acctMsg("Google vinculado a " + a.name + ". Ya podés entrar con Google desde otro celu."); return; }
+    const nm = ($("acctName").value || "").trim() || getPlayerName() || "Jugador";
+    const r = await apiFetch("/login/google", { method: "POST", noAuth: true, body: { credential: resp.credential, name: nm } });
+    acctSet({ token: r.token, code: r.code, name: r.name }); acctRender();
+    acctMsg(r.created ? `Cuenta creada con Google: ${r.name}.` : `Bienvenido de nuevo, ${r.name}. Tocá ⬇ Restaurar para traer tu progreso.`);
+    fetchSeason();
+  } catch (e) { acctMsg("No se pudo entrar con Google: " + (e.message || "error"), false); }
+}
+async function googleInit() {
+  const id = ONLINE_CONFIG.googleClientId, box = $("acctGoogle"); if (!box) return;
+  if (!id || !apiBase()) { box.hidden = true; return; }
+  box.hidden = false;
+  try {
+    await gisLoad();
+    google.accounts.id.initialize({ client_id: id, callback: googleCredential, auto_select: false });
+    $("acctGBtn").replaceChildren(); google.accounts.id.renderButton($("acctGBtn"), { type: "standard", theme: "filled_black", size: "large", text: "continue_with", shape: "pill", locale: "es" });
+  } catch (e) { $("acctGBtn").textContent = "Google no disponible sin conexión."; }
+}
+$("acctDelete").onclick = async () => {
+  const a = acctGet(); if (!a) { acctMsg("No tenés cuenta online.", false); return; }
+  if (!confirm("Esto borra tu cuenta online: nombre, puntajes del ranking y progreso guardado en la nube. El progreso de este dispositivo NO se borra. ¿Eliminar?")) return;
+  try { await apiFetch("/account/delete", { method: "POST", body: {} }); try { localStorage.removeItem(ACCT_KEY); } catch (e) { } acctRender(); acctMsg("Cuenta online eliminada."); }
+  catch (e) { acctMsg("No se pudo eliminar: " + (e.message || "error"), false); }
+};
 try { const au = localStorage.getItem("handtrix-autosync-v1"); $("acctAuto").checked = au !== "0"; } catch (e) { }
 $("acctAuto").onchange = () => { try { localStorage.setItem("handtrix-autosync-v1", $("acctAuto").checked ? "1" : "0"); } catch (e) { } };
 $("scorePeriod").addEventListener("change", () => { if (scoreView === "global") loadGlobalScores(); });
@@ -11046,7 +11082,7 @@ function applyRemoteSeason() {
 { const _rq = renderQuests; renderQuests = function () { const v = _rq.apply(this, arguments); try { applyRemoteSeason(); } catch (e) { } return v; }; }
 { const _rs = renderSeasonPage; renderSeasonPage = function () { const v = _rs.apply(this, arguments); try { applyRemoteSeason(); } catch (e) { } return v; }; }
 { const _sa = seasonAdd; seasonAdd = function (xp) { const m = remoteSeason && remoteSeason.xp_multiplier > 1 ? remoteSeason.xp_multiplier : 1; return _sa.call(this, Math.round(xp * m)); }; }
-acctRender(); fetchSeason();
+acctRender(); fetchSeason(); googleInit();
 
 // ---------- Perfil: cuenta, estadísticas y gráficos ----------
 const PF_MODES = [["classic", "Aventura", "#38e8ff"], ["zen", "Zen", "#4dff9a"], ["time", "Contrarreloj", "#ffd23d"], ["chaos", "Caos", "#ff4fd8"], ["sprint", "Sprint 40", "#ff8a1f"], ["daily", "Diario", "#9b6bff"], ["boss", "Jefes", "#ff4a4a"]];
