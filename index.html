@@ -3044,6 +3044,13 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 #lgGBtn { min-height:44px; display:flex; justify-content:center; max-width:100%; overflow:hidden; }
 .lg-never { background:none; border:0; color:#8f88b8; font:inherit; font-size:11px; text-decoration:underline; cursor:pointer; padding:6px; }
 </style>
+<style id="homeBarCss">
+#menu .home-bar { grid-template-columns:62px minmax(0,1fr) 52px 52px !important; }
+#menu .home-bar #hbGear { width:62px !important; height:54px !important; display:flex !important; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:0 !important; }
+#menu .home-bar #hbGear .msv { width:24px; height:24px; }
+#menu .home-bar #hbGear span { font:800 10px/1 system-ui,sans-serif; letter-spacing:.05em; color:#e8edff; text-transform:uppercase; }
+#menu .home-bar b { font-size:clamp(13px,4.3vw,26px) !important; letter-spacing:0 !important; padding:0 2px; overflow:visible; white-space:nowrap; }
+</style>
 </head>
 <!-- V16: misiones por partida, bonus de puntos y progresión visible; conserva controles y biomas de V15. -->
 <body>
@@ -3174,7 +3181,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
       <b style="letter-spacing:.1em">🩺 INFORME DE DIAGNÓSTICO</b>
       <textarea id="diagText" readonly style="flex:1;min-height:42vh;width:100%;box-sizing:border-box;background:#070520;color:#cfe9ff;border:1px solid #3a2a8a;border-radius:10px;padding:8px;font:11px/1.35 ui-monospace,monospace"></textarea>
       <div id="diagStatus" style="font-size:12px;min-height:16px"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="diagDo">📋 Copiar</button><button class="btn ghost small" id="diagShare">↗ Compartir / descargar</button><button class="btn ghost small" id="diagClose">Cerrar</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="diagDo">📋 Copiar</button><button class="btn ghost small" id="diagSend">📤 Enviar al desarrollador</button><button class="btn ghost small" id="diagShare">↗ Compartir / descargar</button><button class="btn ghost small" id="diagClose">Cerrar</button></div>
     </div>
   </div>
 
@@ -3239,7 +3246,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
           </div>
           <section class="hub-strip" style="display:none"><div class="hs-head"><span>🗺️ MAPA DE AVENTURA</span><button id="hubMapAll">VER TODO ›</button></div><div class="hs-nodes" id="hubMapNodes"></div></section>
           <div class="home-shop-slot" id="homeShopSlot"></div>
-          <div class="home-bar" id="homeBar"><button type="button" id="hbGear" aria-label="Configuración"><svg class="msv" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></button><b>HANDTRIX</b><button type="button" id="hbRank" aria-label="Clasificación"><svg class="msv" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M9 18h6"/></svg></button><button type="button" id="hbHelp" aria-label="Cómo jugar"><svg class="msv" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 1-1 1.7M12 17h.01"/></svg></button></div>
+          <div class="home-bar" id="homeBar"><button type="button" id="hbGear" aria-label="Ajustes"><svg class="msv" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span>Ajustes</span></button><b>HANDTRIX</b><button type="button" id="hbRank" aria-label="Clasificación"><svg class="msv" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M9 18h6"/></svg></button><button type="button" id="hbHelp" aria-label="Cómo jugar"><svg class="msv" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 1-1 1.7M12 17h.01"/></svg></button></div>
           <div class="home-strip" id="homeStrip">
             <button type="button" class="hs-card hs-q" id="hsgQuests"><span class="hs-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span><b>Misiones</b><small>Del día y semanales</small><em id="hsgQb" hidden>0</em></button>
             <button type="button" class="hs-card hs-r" id="hsgRank"><span class="hs-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span><b>Rango <span id="hsgRk">1</span></b><small id="hsgXp"></small></button>
@@ -3271,7 +3278,6 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
             <div class="home-section-head"><b>📚 Colección</b><span>Objetos, apariencias, logros y descubrimientos.</span></div>
             <button class="hub-tile home-collection-link" id="goCollectionFull" type="button"><i>🗂️</i><b>Álbum, logros y perfil</b><small>Ver lo que desbloqueaste y tu trayectoria.</small></button>
           </section>
-          <button type="button" class="dl-game" id="downloadGame">⬇ Descargar HANDTRIX.html</button>
           <div class="home-footer">TU DESTREZA · TU MEJOR ARMA</div>
         </div>
       </div>
@@ -3489,6 +3495,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <button class="btn ghost small" id="cfgAdmin">Administración (catálogo y probabilidades)</button>
         <button class="btn ghost small" id="diagCopy">Copiar informe de diagnóstico</button></div>
         <small id="diagMsg" class="cfg-msg"></small>
+        <small id="verLine" class="cfg-msg" style="opacity:.7"></small>
       </section>
       </div>
         <button class="btn ghost small" id="backHome2">‹ Volver</button>
@@ -10468,7 +10475,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-02 10:04";
+const BUILD_STAMP = "2026-11-17 01:15";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -10518,6 +10525,14 @@ $("diagShare").onclick = async () => {
   try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ta.value], { type: "text/plain" })); a.download = "handtrix-diagnostico.txt"; document.body.appendChild(a); a.click(); a.remove(); st.textContent = "Se descargó handtrix-diagnostico.txt"; st.style.color = "#7dffb0"; } catch (e) { st.textContent = "No se pudo compartir ni descargar."; }
 };
 $("diagCopy").onclick = diagCopy;
+try { $("verLine").textContent = "Versión " + BUILD_STAMP; } catch (e) { }
+$("diagSend").onclick = async () => {
+  const ta = $("diagText"), st = $("diagStatus");
+  if (!onlineConfigured()) { st.textContent = "Sin servidor configurado: usá Copiar o Compartir."; st.style.color = "#ffd23d"; return; }
+  st.textContent = "Enviando…"; st.style.color = "#cfe9ff";
+  try { await apiFetch("/report", { method: "POST", noAuth: true, body: { text: ta.value.slice(0, 12000), ver: BUILD_STAMP } }); st.textContent = "✔ Enviado. ¡Gracias!"; st.style.color = "#7dffb0"; }
+  catch (e) { st.textContent = "No se pudo enviar: " + (e.message || "error") + ". Usá Copiar o Compartir."; st.style.color = "#ffd23d"; }
+};
 diagLog("juego iniciado");
 
 // ---------- Victoria de mundo + tutorial de gestos guiado ----------
