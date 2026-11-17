@@ -3478,7 +3478,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <button class="btn ghost small" id="acctLogin">Recuperar cuenta con código</button>
         <div id="acctGoogle" hidden><small class="cfg-note" style="display:block;margin:6px 0 4px">O entrá con Google (sirve para volver a tu cuenta desde otro celu):</small><div id="acctGBtn" style="min-height:44px"></div></div>
         <button class="btn ghost small" id="acctDelete">Eliminar mi cuenta online</button>
-        <label class="cfg-row cfg-tg"><span class="cfg-lab"><small style="margin:0;font-size:12px">Guardar el progreso solo al terminar cada partida</small></span><input id="acctAuto" type="checkbox" checked></label>
+        <label class="cfg-row cfg-tg"><span class="cfg-lab"><small style="margin:0;font-size:12px">Guardado automático en la nube</small></span><input id="acctAuto" type="checkbox" checked></label>
         <small id="acctMsg" class="cfg-msg"></small>
       </section>
       <section class="cfg-card"><h3 class="cfg-h"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6a4 4 0 0 0 5 5l-9 9a2.5 2.5 0 0 1-4-4l9-9a4 4 0 0 0-1-1z"/></svg>Herramientas</h3>
@@ -11052,6 +11052,7 @@ async function googleCredential(resp) {
     const r = await apiFetch("/login/google", { method: "POST", noAuth: true, body: { credential: resp.credential, name: nm } });
     acctSet({ token: r.token, code: r.code, name: r.name }); acctRender();
     acctMsg(r.created ? `Cuenta creada con Google: ${r.name}.` : `Bienvenido de nuevo, ${r.name}. Tocá ⬇ Restaurar para traer tu progreso.`);
+    if (!r.created) { try { if (loadCareer().games === 0) setTimeout(cloudDown, 300); } catch (e) { } }
     fetchSeason(); $("acctGBtn").replaceChildren(); if (!$("loginModal").hidden) loginPanelClose();
   } catch (e) { acctMsg("No se pudo entrar con Google: " + (e.message || "error"), false); try { $("lgMsg").textContent = "No se pudo entrar: " + (e.message || "error"); } catch (er) { } }
 }
@@ -11256,6 +11257,16 @@ function pinkiFreeUse() { try { localStorage.setItem(PINKI_FREE_KEY, new Date().
 // ---- Progreso en la nube automático (mascota, XP, vestuario…) ----
 function cloudAuto() { try { return onlineConfigured() && acctGet() && (!$("acctAuto") || $("acctAuto").checked); } catch (e) { return false; } }
 let _cloudT = 0;
+let _cloudHash = "", _cloudAt = 0;
+function cloudHashNow() { const t = JSON.stringify(cloudCollect()); let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return t.length + ":" + h; }
+async function cloudIfChanged(force) {
+  try {
+    if (!cloudAuto() || loadCareer().games === 0 || (!force && Date.now() - _cloudAt < 60000)) return;   // en un celu vacío nunca sube (primero restaura)
+    const h = cloudHashNow(); if (h === _cloudHash) return; _cloudAt = Date.now(); if (await cloudUp(true)) _cloudHash = h;
+  } catch (e) { }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") cloudIfChanged(true); });
+setInterval(() => { if (document.visibilityState === "visible") cloudIfChanged(false); }, 300000);
 function cloudSoon(ms) { clearTimeout(_cloudT); _cloudT = setTimeout(() => { try { if (cloudAuto()) cloudUp(true); } catch (e) { } }, ms || 4000); }
 { const _sp = setActivePet; setActivePet = function () { const r = _sp.apply(this, arguments); cloudSoon(1500); return r; }; }
 { const _go = gameOver; gameOver = function () { const r = _go.apply(this, arguments); cloudSoon(6000); return r; }; }
