@@ -4953,6 +4953,9 @@ const TETRA_STAGES = [
   { id: 2, name: "Guardián",   at: 2500, scale: 1.0,  perk: "+1 💎 por jefe · +5% de puntos", trait: "Armadura dorada, cuernos, 3 colas y escudos" },
   { id: 3, name: "Legendario", at: 7000, scale: 1.0,  perk: "+2 💎 por jefe · +10% de puntos", trait: "Alas de luz, corona, halo y tetrominós orbitando" },
 ];
+const PINKI_STAGE_TXT = [["Conejita de cristal original", "+1 💎 al derrotar un jefe"], ["Bufanda de energía y gema en la frente", "+2 💎 al derrotar un jefe"], ["Armadura dorada y aros en las orejas", "+2 💎 por jefe · +5% de puntos"], ["Alas de luz, corona y halo", "+3 💎 por jefe · +10% de puntos"]];
+const stageTrait = s => { try { return activePet() === "pinki" ? PINKI_STAGE_TXT[s.id][0] : s.trait; } catch (e) { return s.trait; } };
+const stagePerk = s => { try { return activePet() === "pinki" ? PINKI_STAGE_TXT[s.id][1] : s.perk; } catch (e) { return s.perk; } };
 function tetraData() { try { const o = JSON.parse(localStorage.getItem(TETRA_XP_KEY) || "{}"); return { xp: Math.max(0, +o.xp || 0), seen: Math.max(0, +o.seen || 0) }; } catch (e) { return { xp: 0, seen: 0 }; } }
 function tetraSaveData(o) { try { localStorage.setItem(TETRA_XP_KEY, JSON.stringify(o)); } catch (e) { } }
 function tetraStageFor(xp) { let s = TETRA_STAGES[0]; for (const t of TETRA_STAGES) if (xp >= t.at) s = t; return s; }
@@ -7454,7 +7457,7 @@ function vxGeo(T, low) {
 function vxShade(hex, f) { const r = Math.min(255, ((hex >> 16) & 255) * f), g = Math.min(255, ((hex >> 8) & 255) * f), b = Math.min(255, (hex & 255) * f); return (r << 16) | (g << 8) | b; }
 function vxPalette(id) {
   const P = Object.assign({}, VOX_PAL);
-  if (id === "pinki") { const d = pinkiSkinDef().p; P.U = d[0]; P.V = d[1]; P.r = d[2]; }
+  if (id === "pinki") { const d = pinkiSkinDef().p; P.U = d[0]; P.V = d[1]; P.r = d[2]; P.A = 0x7ff2ff; P.S = 0xffd23d; }
   else { const L = tetraLook(), c = tetraSkinColors(L.skin || "cristal"); P.B = c[0]; P.D = vxShade(c[0], 0.74); P.S = c[1]; P.A = c[2]; P.E = vxShade(c[0], 1.0) === c[0] ? 0x7ff2ff : 0x7ff2ff; }
   return P;
 }
@@ -7471,6 +7474,46 @@ function vxAccessory(acc, id) {
   else if (acc === "alas") { for (const sx of [-1, 1]) for (let k = 0; k < 9; k++) for (let j = 0; j <= Math.min(k, 4); j++) put(sx * (6 + k), 8 + k - Math.floor(j / 2) + 0, -5 - (j > 3 ? 1 : 0), (k + j) % 3 === 0 ? "L" : "W"); }
   else if (acc === "aura") { for (let a = 0; a < 360; a += 12) { const c = Math.cos(a * Math.PI / 180), s2 = Math.sin(a * Math.PI / 180); put(Math.round(11 * c), 3, Math.round(11 * s2), "A"); put(Math.round(13 * c), 6, Math.round(13 * s2), "L"); } }
   return o;
+}
+// Evolución visible de Pinki (usa la misma etapa que Tetra): 1 bufanda y gema · 2 armadura dorada · 3 alas, corona y halo
+function vxPinkiStage(st, data, headAcc, NECK) {
+  const out = [], O = [0, 0, 0];
+  if (st < 1) return out;
+  const sc = [];   // bufanda de energía alrededor del cuello + punta colgando
+  for (let a = 0; a < 360; a += 15) { const r = a * Math.PI / 180, x = Math.round(5.4 * Math.cos(r)), z = Math.round(4.4 * Math.sin(r)); for (const y of [9, 10]) sc.push([x, y, z, (a / 15) % 2 ? "L" : "k"]); }
+  for (let y = 8; y >= 3; y--) { sc.push([-5, y, 4, y % 2 ? "L" : "k"]); sc.push([-6, y, 4, y % 2 ? "k" : "L"]); }
+  out.push({ n: "pScarf", parent: "fx", mat: "glow", pv: O, off: O, vox: sc });
+  out.push({ n: "pGem", parent: "headG", mat: "glow", pv: NECK, off: NECK, vox: [[0, 20, 5, "L"], [-1, 20, 5, "L"], [1, 20, 5, "L"], [0, 21, 5, "G"]] });
+  if (st >= 2) {
+    const ar = [];   // hombreras y peto dorados
+    for (const sx of [-1, 1]) for (let x = 5; x <= 6; x++) for (let z = -2; z <= 2; z++) ar.push([sx * x, 10, z, "G"]), x === 6 && ar.push([sx * x, 9, z, "G"]);
+    for (let y = 4; y <= 7; y++) for (let x = -3; x <= 3; x++) ar.push([x, y, 4, (x === 0 && y === 5) ? "L" : "G"]);
+    out.push({ n: "pArmor", parent: "fx", mat: "metal", pv: O, off: O, vox: ar });
+    ["ear0", "ear1"].forEach(n => {   // aros dorados en las orejas (siguen el movimiento de la oreja)
+      const part = data.find(p => p.n === n); if (!part || !part.v) return;
+      const cells = part.v.split(";").map(t => t.split(",").slice(0, 3).map(Number)).filter(a => a.length === 3 && !a.some(isNaN)).map(a => [a[0] + part.pv[0], a[1] + part.pv[1], a[2] + part.pv[2]]).filter(c => c[1] === 28);
+      if (!cells.length) return;
+      const x0 = Math.min(...cells.map(c => c[0])) - 1, x1 = Math.max(...cells.map(c => c[0])) + 1, z0 = Math.min(...cells.map(c => c[2])) - 1, z1 = Math.max(...cells.map(c => c[2])) + 1, v = [];
+      for (const y of [27, 28]) for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) if (x === x0 || x === x1 || z === z0 || z === z1) v.push([x, y, z, "G"]);
+      out.push({ n: n + "B", parent: n, mat: "metal", pv: O, off: part.pv, vox: v });
+    });
+  }
+  if (st >= 3) {
+    const wv = [];   // alas de luz: abanico de plumas con puntas celestes
+    for (const sx of [-1, 1]) for (let x = 6; x <= 14; x++) {
+      const top = Math.round(9 + (x - 6) * 0.8), bot = Math.round(9 - (x - 6) * 0.45) - (x % 2 ? 0 : 1);
+      for (let y = bot; y <= top; y++) for (const z of [-4, -5]) wv.push([sx * x, y, z, y <= bot + 1 ? "L" : y >= top ? "k" : "W"]);
+    }
+    out.push({ n: "wings", parent: "fx", mat: "glow", pv: O, off: O, vox: wv });
+    out.push({ n: "halo", parent: "fx", mat: "glow", pv: O, off: O, vox: vxAccessory("halo", "pinki") });
+    if (!headAcc) {   // corona sobre la frente (sigue la curva de la cabeza)
+      const hd = {}; data.filter(p => p.n === "head").forEach(p => p.v.split(";").forEach(t => { const a = t.split(",").slice(0, 3).map(Number); if (a.length === 3 && !a.some(isNaN)) { const k = (a[0] + p.pv[0]) + "," + (a[2] + p.pv[2]), y = a[1] + p.pv[1]; if (hd[k] === undefined || y > hd[k]) hd[k] = y; } }));
+      const cv = [];
+      for (let x = -3; x <= 3; x++) for (let z = 1; z <= 4; z++) { const y = hd[x + "," + z]; if (y === undefined) continue; cv.push([x, y + 1, z, "G"]); if (z === 4 && [-2, 0, 2].includes(x)) { cv.push([x, y + 2, z, "G"]); cv.push([x, y + 3, z, x === 0 ? "L" : "G"]); } }
+      out.push({ n: "pCrown", parent: "headG", mat: "metal", pv: NECK, off: NECK, vox: cv });
+    }
+  }
+  return out;
 }
 function voxelPet(id, g, s, T) {
   const low = document.body.classList.contains("gfx-low"), st = id === "tetra" ? Math.max(0, Math.min(3, tetraStage().id)) : 0;
@@ -7509,6 +7552,16 @@ function voxelPet(id, g, s, T) {
       const HP = [[-2.5, 3.5, 1.2], [2.5, 3.5, 1.2]];
       [list.filter(v => v[0] < 0), list.filter(v => v[0] >= 0)].forEach((l, k) => { const hp = HP[k]; mk(k ? "legR" : "legL", [hp[0] + p.pv[0], hp[1] + p.pv[1], hp[2] + p.pv[2]], p.p, p.m, l.map(v => [v[0] - hp[0], v[1] - hp[1], v[2] - hp[2], v[3], v[4]])); });
     } else mk(p.n, p.pv, p.p, p.m, list); });
+  // evolución visible de Pinki
+  if (id === "pinki") {
+    try {
+      const stg = Math.max(0, Math.min(3, tetraStage().id)), accN = tetraLook().acc, headAcc = ["gafas", "gorro", "corona", "halo", "lazo", "auris"].includes(accN);
+      vxPinkiStage(stg, data, headAcc, NECK).forEach(pt => {
+        const list = []; pt.vox.forEach(v => { const k = key(v[0], v[1], v[2]); if (!occ.has(k)) { occ.add(k); list.push([v[0] - pt.off[0], v[1] - pt.off[1], v[2] - pt.off[2], v[3], 2]); } });
+        mk(pt.n, pt.pv, pt.parent, pt.mat, list);
+      });
+    } catch (e) { console.warn("pinki stage", e); }
+  }
   // accesorios del vestuario
   try {
     const acc = tetraLook().acc;
@@ -7547,6 +7600,7 @@ function voxelPet(id, g, s, T) {
       if (a0) a0.rotation.x = Math.sin(t * 2.2) * 0.12; if (a1) a1.rotation.x = -Math.sin(t * 2.2) * 0.12;
     }
     if (hl) hl.rotation.y = t * 0.9;
+    if (groups.wings) groups.wings.position.y = Math.sin(t * 2.2) * 0.35;
     if (pd) { pd.rotation.z = Math.sin(t * 2.0 + 0.5) * 0.12; pd.rotation.x = Math.sin(t * 1.7) * 0.06; }
     if (t > nextB) { bl = t; nextB = t + 2.5 + Math.random() * 3; }
     if (ey) ey.scale.y = (ud.calm && ud.mode === "sleep") ? 0.1 : t - bl < 0.13 ? 0.1 : 1;
@@ -10475,7 +10529,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-17 01:15";
+const BUILD_STAMP = "2026-11-17 10:30";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -10800,7 +10854,7 @@ function evoConfetti() {
 function playEvolution(from, to, done) {
   const box = $("evoBox"), flash = $("evoFlash"), rays = $("evoRays"), go = $("evoGo"), st = TETRA_STAGES[to];
   $("evoModal").hidden = false; go.hidden = true; $("evoName").textContent = "¡Algo está pasando…!"; $("evoPerk").textContent = ""; $("evoSmall").textContent = "¡EVOLUCIÓN!";
-  const finish = () => { tetraStageOverride = -1; $("evoName").textContent = `Tetra ahora es ${st.name}`; $("evoPerk").textContent = (st.trait ? "Rasgo: " + st.trait + " · " : "") + "Ventaja: " + st.perk; go.hidden = false; box.classList.remove("evo-shake"); rays.style.opacity = .55; done(); };
+  const finish = () => { tetraStageOverride = -1; $("evoName").textContent = `${activePet() === "pinki" ? "Pinki" : "Tetra"} ahora es ${st.name}`; $("evoPerk").textContent = (stageTrait(st) ? "Rasgo: " + stageTrait(st) + " · " : "") + "Ventaja: " + stagePerk(st); go.hidden = false; box.classList.remove("evo-shake"); rays.style.opacity = .55; done(); };
   evoMount(from);
   if (reduceMotion) { evoMount(to); try { audio.levelUp(); } catch (e) { } finish(); return; }
   try { audio.evolveCharge(); haptic([30, 40, 30, 40, 60]); } catch (e) { }
@@ -10871,7 +10925,7 @@ function renderHomeBadges() {
 function renderPetPage() {
   renderTetraCard();
   const d = tetraData(), cur = tetraStageFor(d.xp);
-  $("petStages").innerHTML = TETRA_STAGES.map(s => `<div class="ps${s.id === cur.id ? " cur" : ""}${d.xp >= s.at ? " got" : ""}"><i>${d.xp >= s.at ? "✔" : "🔒"}</i><div><b>${s.name}</b><small>${s.at ? s.at.toLocaleString("es-AR") + " XP · " : ""}${s.trait ? s.trait + " · " : ""}${s.perk}</small></div></div>`).join("");
+  $("petStages").innerHTML = TETRA_STAGES.map(s => `<div class="ps${s.id === cur.id ? " cur" : ""}${d.xp >= s.at ? " got" : ""}"><i>${d.xp >= s.at ? "✔" : "🔒"}</i><div><b>${s.name}</b><small>${s.at ? s.at.toLocaleString("es-AR") + " XP · " : ""}${stageTrait(s) ? stageTrait(s) + " · " : ""}${stagePerk(s)}</small></div></div>`).join("");
   try {
     const L = tetraLook(), sk = (TETRA_SHOP.find(x => x.id === L.skin) || {}).name || "Cristal", ac = L.acc ? (TETRA_SHOP.find(x => x.id === L.acc) || {}).name : "ninguno";
     $("petLook").innerHTML = `<b>Vestuario actual</b><span>Color: ${sk} · Accesorio: ${ac}</span><span>Tenés ${L.owned.length} ${L.owned.length === 1 ? "prenda" : "prendas"} en tu colección.</span>`;
