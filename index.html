@@ -4951,10 +4951,11 @@ const TETRA_STAGES = [
   { id: 0, name: "Cachorro",   at: 0,    scale: 0.80, perk: "Sin ventajas todavía", trait: "Zorro de cristal original" },
   { id: 1, name: "Joven",      at: 500,  scale: 0.94, perk: "+1 💎 al derrotar un jefe", trait: "Bufanda de energía, cresta y ojos verdes" },
   { id: 2, name: "Guardián",   at: 2500, scale: 1.0,  perk: "+1 💎 por jefe · +5% de puntos", trait: "Armadura dorada, cuernos, 3 colas y escudos" },
-  { id: 3, name: "Legendario", at: 7000, scale: 1.0,  perk: "+2 💎 por jefe · +10% de puntos", trait: "Alas de luz, corona, halo y tetrominós orbitando" },
+  { id: 3, name: "Legendario", at: 7000, scale: 1.0,  perk: "+2 💎 por jefe · +10% de puntos", trait: "Alas de luz, halo, ojos rosados y tetrominós orbitando" },
 ];
 const PINKI_STAGE_TXT = [["Conejita de cristal original", "+1 💎 al derrotar un jefe"], ["Bufanda de energía y gema en la frente", "+2 💎 al derrotar un jefe"], ["Armadura dorada y aros en las orejas", "+2 💎 por jefe · +5% de puntos"], ["Alas de luz, corona y halo", "+3 💎 por jefe · +10% de puntos"]];
 const stageTrait = s => { try { return activePet() === "pinki" ? PINKI_STAGE_TXT[s.id][0] : s.trait; } catch (e) { return s.trait; } };
+const stageFit = () => { try { return [1, 1, .88, .74][Math.max(0, Math.min(3, tetraStage().id))]; } catch (e) { return 1; } };
 const stagePerk = s => { try { return activePet() === "pinki" ? PINKI_STAGE_TXT[s.id][1] : s.perk; } catch (e) { return s.perk; } };
 function tetraData() { try { const o = JSON.parse(localStorage.getItem(TETRA_XP_KEY) || "{}"); return { xp: Math.max(0, +o.xp || 0), seen: Math.max(0, +o.seen || 0) }; } catch (e) { return { xp: 0, seen: 0 }; } }
 function tetraSaveData(o) { try { localStorage.setItem(TETRA_XP_KEY, JSON.stringify(o)); } catch (e) { } }
@@ -7458,7 +7459,7 @@ function vxShade(hex, f) { const r = Math.min(255, ((hex >> 16) & 255) * f), g =
 function vxPalette(id) {
   const P = Object.assign({}, VOX_PAL);
   if (id === "pinki") { const d = pinkiSkinDef().p; P.U = d[0]; P.V = d[1]; P.r = d[2]; P.A = 0x7ff2ff; P.S = 0xffd23d; }
-  else { const L = tetraLook(), c = tetraSkinColors(L.skin || "cristal"); P.B = c[0]; P.D = vxShade(c[0], 0.74); P.S = c[1]; P.A = c[2]; P.E = vxShade(c[0], 1.0) === c[0] ? 0x7ff2ff : 0x7ff2ff; }
+  else { const L = tetraLook(), c = tetraSkinColors(L.skin || "cristal"); P.B = c[0]; P.D = vxShade(c[0], 0.74); P.S = c[1]; P.A = c[2]; P.E = 0x7ff2ff; try { P.E = [0x7ff2ff, 0x66ff99, 0xffd23d, 0xff8ae6][Math.max(0, Math.min(3, tetraStage().id))]; } catch (e) { } }
   return P;
 }
 // accesorios de la Tienda como piezas voxel (coordenadas globales; se omiten las celdas ya ocupadas por el modelo)
@@ -7515,6 +7516,49 @@ function vxPinkiStage(st, data, headAcc, NECK) {
   }
   return out;
 }
+// Evolución visible de Tetra: 1 bufanda, cresta y ojos verdes · 2 armadura dorada, cuernos, 3 colas y escudos · 3 alas, tetrominós orbitando y ojos rosados
+function vxTetraStage(st, data, headAcc, NECK) {
+  const out = [], O = [0, 0, 0]; if (st < 1) return out;
+  const hd = {}; data.filter(p => p.n === "head").forEach(p => p.v.split(";").forEach(t => { const a = t.split(",").slice(0, 3).map(Number); if (a.length === 3 && !a.some(isNaN)) { const k = (a[0] + p.pv[0]) + "," + (a[2] + p.pv[2]), y = a[1] + p.pv[1]; if (hd[k] === undefined || y > hd[k]) hd[k] = y; } }));
+  const top = (x, z) => hd[x + "," + z] === undefined ? 22 : hd[x + "," + z];
+  const cc = [null, ["L", "k"], ["G", "W"], ["W", "k"]][st], sc = [];   // bufanda: cambia de color en cada etapa
+  for (let a = 0; a < 360; a += 15) { const r = a * Math.PI / 180, x = Math.round(3.6 * Math.cos(r)), z = Math.round(3.6 * Math.sin(r)); for (const y of [10, 11]) sc.push([x, y, z, cc[(a / 15) % 2]]); }
+  for (let i = 0; i < 13; i++) { const x = -4 - Math.round(i * 0.5), z = -1 - i, y = 10 + Math.round(Math.sin(i * 0.8) * 1.3); sc.push([x, y, z, cc[i % 2]], [x, y + 1, z, cc[(i + 1) % 2]]); }
+  out.push({ n: "pScarf", parent: "fx", mat: "glow", pv: O, off: O, vox: sc });
+  if (st === 1 && !headAcc) {   // cresta de cristal entre las orejas
+    const cr = [], H = [2, 4, 6, 5, 3, 2];
+    for (let z = -3; z <= 2; z++) for (let k = 1; k <= H[z + 3]; k++) cr.push([0, top(0, z) + k, z, k === H[z + 3] ? "A" : "L"]);
+    out.push({ n: "pCrest", parent: "headG", mat: "glow", pv: NECK, off: NECK, vox: cr });
+  }
+  if (st >= 2) {
+    const ar = [];   // hombreras, peto
+    for (const sx of [-1, 1]) for (let x = 7; x <= 9; x++) for (let y = 11; y <= 13; y++) for (let z = -3; z <= 3; z++) { if (y === 13 && Math.abs(z) > 2) continue; if (x === 9 && Math.abs(z) === 3) continue; ar.push([sx * x, y, z, (x === 9 && y === 12 && z === 0) ? "L" : "G"]); }
+    for (let y = 5; y <= 9; y++) for (let x = -3; x <= 3; x++) { if (y === 9 && Math.abs(x) === 3) continue; ar.push([x, y, 4, (x === 0 && y === 7) ? "L" : "G"]); }
+    out.push({ n: "pArmor", parent: "fx", mat: "metal", pv: O, off: O, vox: ar });
+    if (!headAcc) {   // cuernos dorados que se curvan hacia adelante
+      const hv = [];
+      for (const sx of [-1, 1]) [[3, 24, 3], [3, 25, 4], [3, 26, 4], [3, 27, 5], [3, 28, 5], [3, 28, 6], [4, 24, 3], [4, 25, 3], [4, 26, 4]].forEach(([x, y, z], i) => hv.push([sx * x, y, z, i === 5 ? "W" : "G"]));
+      out.push({ n: "pHorns", parent: "headG", mat: "metal", pv: NECK, off: NECK, vox: hv });
+    }
+    for (const sx of [-1, 1]) {   // escudos flotantes a los costados
+      const sh = [];
+      for (let y = 5; y <= 15; y++) for (let z = -4; z <= 5; z++) { const q = Math.pow((z - 0.5) / 4.6, 2) + Math.pow((y - 10) / 5.4, 2); if (q > 1) continue; const rim = q > 0.62; for (let x = 13; x <= 14; x++) sh.push([sx * x, y, z, rim ? "G" : (Math.abs(z - 0.5) < 1.2 && Math.abs(y - 10) < 1.6 ? "W" : "L")]); }
+      out.push({ n: sx < 0 ? "shieldL" : "shieldR", parent: "fx", mat: "glow", pv: O, off: O, vox: sh });
+    }
+  }
+  if (st >= 3) {
+    const wv = [];   // alas de luz grandes con puntas
+    for (const sx of [-1, 1]) {
+      for (let x = 5; x <= 7; x++) for (let y = 9; y <= 11; y++) wv.push([sx * x, y, -5, "L"]);
+      for (let x = 8; x <= 17; x++) { const tp = Math.round(10 + (x - 8) * 1.3), bt = Math.round(10 - (x - 8) * 0.4) - (x % 2 ? 0 : 1); for (let y = bt; y <= tp; y++) for (const z of [-5, -6]) wv.push([sx * x, y, z, y <= bt + 1 ? "L" : y >= tp - 1 ? "k" : "W"]); }
+    }
+    out.push({ n: "wings", parent: "fx", mat: "glow", pv: O, off: O, vox: wv });
+    const SH = [[[0, 0], [1, 0], [2, 0], [3, 0]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [2, 0], [1, 1]], [[0, 0], [1, 0], [2, 0], [2, 1]]], CL = ["L", "G", "k", "W"], YY = [4, 9, -2, 6], ov = [];
+    SH.forEach((bl, i) => { const a = i * Math.PI / 2 + 0.4, cx = Math.round(15 * Math.cos(a)), cz = Math.round(15 * Math.sin(a)); bl.forEach(([bx, by]) => { for (let dx = 0; dx < 2; dx++) for (let dy = 0; dy < 2; dy++) for (let dz = 0; dz < 2; dz++) ov.push([cx + bx * 2 + dx - 3, YY[i] + by * 2 + dy, cz + dz, CL[i]]); }); });
+    out.push({ n: "orbit", parent: "fx", mat: "glow", pv: [0, 16, 0], off: [0, 16, 0], vox: ov.map(v => [v[0], v[1] + 16, v[2], v[3]]) });
+  }
+  return out;
+}
 function voxelPet(id, g, s, T) {
   const low = document.body.classList.contains("gfx-low"), st = id === "tetra" ? Math.max(0, Math.min(3, tetraStage().id)) : 0;
   const data = VOX_DATA[id === "pinki" ? "pinki" : "tetra" + st]; if (!data) return null;
@@ -7551,16 +7595,16 @@ function voxelPet(id, g, s, T) {
     if (p.n === "legs" && list.length) {   // dos patas con cadera propia para poder caminar (paso alternado)
       const HP = [[-2.5, 3.5, 1.2], [2.5, 3.5, 1.2]];
       [list.filter(v => v[0] < 0), list.filter(v => v[0] >= 0)].forEach((l, k) => { const hp = HP[k]; mk(k ? "legR" : "legL", [hp[0] + p.pv[0], hp[1] + p.pv[1], hp[2] + p.pv[2]], p.p, p.m, l.map(v => [v[0] - hp[0], v[1] - hp[1], v[2] - hp[2], v[3], v[4]])); });
-    } else mk(p.n, p.pv, p.p, p.m, list); });
-  // evolución visible de Pinki
-  if (id === "pinki") {
+    } else { mk(p.n, p.pv, p.p, p.m, list); if (id === "tetra" && st >= 2 && p.n === "tail") { mk("tail2", p.pv, p.p, p.m, list); mk("tail3", p.pv, p.p, p.m, list); } } });
+  // evolución visible (Pinki y Tetra)
+  if (id === "pinki" || st >= 1) {
     try {
-      const stg = Math.max(0, Math.min(3, tetraStage().id)), accN = tetraLook().acc, headAcc = ["gafas", "gorro", "corona", "halo", "lazo", "auris"].includes(accN);
-      vxPinkiStage(stg, data, headAcc, NECK).forEach(pt => {
+      const stg = id === "pinki" ? Math.max(0, Math.min(3, tetraStage().id)) : st, accN = tetraLook().acc, headAcc = ["gafas", "gorro", "corona", "halo", "lazo", "auris"].includes(accN);
+      (id === "pinki" ? vxPinkiStage(stg, data, headAcc, NECK) : vxTetraStage(stg, data, headAcc, NECK)).forEach(pt => {
         const list = []; pt.vox.forEach(v => { const k = key(v[0], v[1], v[2]); if (!occ.has(k)) { occ.add(k); list.push([v[0] - pt.off[0], v[1] - pt.off[1], v[2] - pt.off[2], v[3], 2]); } });
         mk(pt.n, pt.pv, pt.parent, pt.mat, list);
       });
-    } catch (e) { console.warn("pinki stage", e); }
+    } catch (e) { console.warn("pet stage", e); }
   }
   // accesorios del vestuario
   try {
@@ -7601,6 +7645,9 @@ function voxelPet(id, g, s, T) {
     }
     if (hl) hl.rotation.y = t * 0.9;
     if (groups.wings) groups.wings.position.y = Math.sin(t * 2.2) * 0.35;
+    if (tl && groups.tail2) { groups.tail2.rotation.set(0, tl.rotation.y + 0.62, tl.rotation.z); groups.tail3.rotation.set(0, tl.rotation.y - 0.62, tl.rotation.z); }
+    if (groups.orbit) groups.orbit.rotation.y = t * 0.8;
+    if (groups.shieldL) { groups.shieldL.position.y = Math.sin(t * 1.8) * 0.45; groups.shieldR.position.y = Math.sin(t * 1.8 + 1.6) * 0.45; }
     if (pd) { pd.rotation.z = Math.sin(t * 2.0 + 0.5) * 0.12; pd.rotation.x = Math.sin(t * 1.7) * 0.06; }
     if (t > nextB) { bl = t; nextB = t + 2.5 + Math.random() * 3; }
     if (ey) ey.scale.y = (ud.calm && ud.mode === "sleep") ? 0.1 : t - bl < 0.13 ? 0.1 : 1;
@@ -10529,7 +10576,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-17 10:30";
+const BUILD_STAMP = "2026-11-17 12:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -10840,7 +10887,7 @@ function renderTetraCard() {
 let evoBusy = false;
 function evoMount(stageId) {   // Tetra 3D grande dentro del cartel, con la etapa indicada
   tetraStageOverride = stageId; const h = $("evoHost"), fox = $("evoFox");
-  try { h.hidden = false; if (p3mount(h, "tetra", 180)) { p3.root.scale.setScalar(.8); p3.root.position.y = .1; fox.hidden = true; return true; } } catch (e) { }
+  try { h.hidden = false; if (p3mount(h, "tetra", 180)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; fox.hidden = true; return true; } } catch (e) { }
   h.hidden = true; fox.hidden = false; return false;
 }
 function evoConfetti() {
@@ -10930,7 +10977,7 @@ function renderPetPage() {
     const L = tetraLook(), sk = (TETRA_SHOP.find(x => x.id === L.skin) || {}).name || "Cristal", ac = L.acc ? (TETRA_SHOP.find(x => x.id === L.acc) || {}).name : "ninguno";
     $("petLook").innerHTML = `<b>Vestuario actual</b><span>Color: ${sk} · Accesorio: ${ac}</span><span>Tenés ${L.owned.length} ${L.owned.length === 1 ? "prenda" : "prendas"} en tu colección.</span>`;
   } catch (e) { }
-  try { const h = $("petHost"); h.hidden = false; if (p3mount(h, "tetra", 150)) { p3.root.scale.setScalar(.8); p3.root.position.y = .1; } else h.hidden = true; } catch (e) { try { $("petHost").hidden = true; } catch (e2) { } }
+  try { const h = $("petHost"); h.hidden = false; if (p3mount(h, "tetra", 150)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; } else h.hidden = true; } catch (e) { try { $("petHost").hidden = true; } catch (e2) { } }
 }
 function openShopTetra(tab) { shopTab = tab; refreshChestShop(); $("chestShop").hidden = false; }
 const safeClick = (id, fn) => { const el = $(id); if (!el) return; el.onclick = e => { try { fn(e); } catch (err) { console.error(err); try { showFx("⚠ " + (err && err.message || err), "level"); } catch (e2) { } } }; };
@@ -11528,6 +11575,5 @@ Object.assign(ACHIEVEMENTS, {
   renderProfile=function(){ _pf(); try{ if(activePet()==="pinki"){ paintBunny($("pfFox")); const c=$("pfChips").firstElementChild; if(c) c.textContent="🐰 Pinki + Tetra"; } }catch(e){} };
 })();
 </script>
-<script>if("serviceWorker"in navigator){addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
 </body>
 </html>
