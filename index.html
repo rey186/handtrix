@@ -10576,7 +10576,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-17 12:10";
+const BUILD_STAMP = "2026-11-17 22:55";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -10887,7 +10887,7 @@ function renderTetraCard() {
 let evoBusy = false;
 function evoMount(stageId) {   // Tetra 3D grande dentro del cartel, con la etapa indicada
   tetraStageOverride = stageId; const h = $("evoHost"), fox = $("evoFox");
-  try { h.hidden = false; if (p3mount(h, "tetra", 180)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; fox.hidden = true; return true; } } catch (e) { }
+  try { h.hidden = false; if (p3mount(h, activePet(), 180)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; fox.hidden = true; return true; } } catch (e) { }
   h.hidden = true; fox.hidden = false; return false;
 }
 function evoConfetti() {
@@ -10977,7 +10977,7 @@ function renderPetPage() {
     const L = tetraLook(), sk = (TETRA_SHOP.find(x => x.id === L.skin) || {}).name || "Cristal", ac = L.acc ? (TETRA_SHOP.find(x => x.id === L.acc) || {}).name : "ninguno";
     $("petLook").innerHTML = `<b>Vestuario actual</b><span>Color: ${sk} · Accesorio: ${ac}</span><span>Tenés ${L.owned.length} ${L.owned.length === 1 ? "prenda" : "prendas"} en tu colección.</span>`;
   } catch (e) { }
-  try { const h = $("petHost"); h.hidden = false; if (p3mount(h, "tetra", 150)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; } else h.hidden = true; } catch (e) { try { $("petHost").hidden = true; } catch (e2) { } }
+  try { const h = $("petHost"); h.hidden = false; if (p3mount(h, activePet(), 150)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; } else h.hidden = true; } catch (e) { try { $("petHost").hidden = true; } catch (e2) { } }
 }
 function openShopTetra(tab) { shopTab = tab; refreshChestShop(); $("chestShop").hidden = false; }
 const safeClick = (id, fn) => { const el = $(id); if (!el) return; el.onclick = e => { try { fn(e); } catch (err) { console.error(err); try { showFx("⚠ " + (err && err.message || err), "level"); } catch (e2) { } } }; };
