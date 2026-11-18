@@ -2642,6 +2642,24 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 #menuScores .score-tabs .btn{font-weight:900;letter-spacing:.06em}
 #menuScores select{width:100%!important;max-width:none!important;border:2px solid #d4b062!important;border-radius:12px!important;padding:11px 14px!important;background:linear-gradient(180deg,#241a6e,#120a4a)!important;font-weight:700}
 #menuScores #modeRecord{display:inline-block;margin:8px 0 2px;padding:6px 14px;border-radius:99px;background:rgba(255,210,61,.14);border:1.5px solid #ffd23d;color:#ffe7a0!important;font-weight:800}
+/* Clasificación: podio */
+.score-tabs{display:flex;gap:8px;width:100%}.score-tabs .btn{flex:1;border-radius:14px;font-weight:900;letter-spacing:.04em}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:10px 0 8px;width:100%}
+.pd{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.pd-empty{visibility:hidden}
+.pd-tr{font-size:34px;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.pd1 .pd-tr{font-size:46px;filter:drop-shadow(0 0 12px rgba(255,210,61,.8))}
+.pd2 .pd-tr{filter:grayscale(1) brightness(1.5) drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.pd3 .pd-tr{filter:sepia(1) saturate(3) hue-rotate(-20deg) drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.pd-nm{font-size:13px;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.pd-sc{margin:4px 0 2px;padding:3px 8px;border-radius:9px;background:rgba(0,0,0,.55);font-weight:900;font-size:14px;color:#ffe27a;max-width:100%}
+.pd-md{font-size:10px;color:var(--dim);margin-bottom:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-bs{width:100%;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;font-weight:900;font-size:26px;color:rgba(0,0,0,.55);border-radius:12px 12px 4px 4px;box-shadow:inset 0 3px 0 rgba(255,255,255,.45),0 6px 14px rgba(0,0,0,.4)}
+.pd1 .pd-bs{height:84px;background:linear-gradient(180deg,#ffe27a,#ffb020 60%,#c77a00)}
+.pd2 .pd-bs{height:62px;background:linear-gradient(180deg,#eef2ff,#aab4e6 60%,#6f7bb8)}
+.pd3 .pd-bs{height:48px;background:linear-gradient(180deg,#ffb38a,#e06b3c 60%,#9c3d1c)}
+.pd.me .pd-nm{color:#38e8ff}.pd.me .pd-bs{outline:2px solid #38e8ff}
+.rk-head{display:grid;grid-template-columns:44px 1fr auto;gap:8px;padding:6px 14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 #scoresList .sr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;padding:11px 14px;border-radius:14px;background:linear-gradient(170deg,rgba(44,34,144,.85),rgba(14,8,56,.92));border:1.5px solid rgba(150,130,255,.35)}
 #scoresList .sr1{border-color:#ffd23d;background:linear-gradient(170deg,rgba(120,84,0,.75),rgba(30,16,60,.92));box-shadow:0 0 16px rgba(255,210,61,.35)}
 #scoresList .sr2{border-color:#cfd8ff}#scoresList .sr3{border-color:#ff9a5a}
@@ -10333,11 +10351,26 @@ function renderScores(list, emptyText) {
   if (!sorted.length) {
     const empty = document.createElement("p"); empty.style.color = "var(--dim)"; empty.textContent = mode === "all" ? emptyText : `Todavía no hay récords para ${modeLabel(mode)}.`; el.appendChild(empty); return;
   }
+  if (!sorted.length) return;
+  const mkPod = (entry, i) => {
+    const d = document.createElement("div"); d.className = "pd pd" + (i + 1) + (entry.me ? " me" : "");
+    const tr = document.createElement("div"); tr.className = "pd-tr"; tr.textContent = "🏆";
+    const nm = document.createElement("b"); nm.className = "pd-nm"; nm.textContent = String(entry.name ?? "???").slice(0, 10);
+    const sc = document.createElement("div"); sc.className = "pd-sc"; sc.textContent = Math.max(0, Number(entry.score) || 0).toLocaleString("es-AR");
+    const md = document.createElement("small"); md.className = "pd-md"; md.textContent = modeLabel(entry.mode);
+    const bs = document.createElement("div"); bs.className = "pd-bs"; bs.textContent = String(i + 1);
+    d.append(tr, nm, sc, md, bs); return d;
+  };
+  const pod = document.createElement("div"); pod.className = "podium";
+  [1, 0, 2].forEach(i => { if (sorted[i]) pod.appendChild(mkPod(sorted[i], i)); else { const g = document.createElement("div"); g.className = "pd pd-empty"; pod.appendChild(g); } });
+  el.appendChild(pod);
+  const hd = document.createElement("div"); hd.className = "rk-head"; hd.innerHTML = "<span>N.º</span><span>Jugador</span><span>Puntos</span>"; if (sorted.length > 3) el.appendChild(hd);
   sorted.slice(0, 15).forEach((entry, i) => {
+    if (i < 3) return;
     const row = document.createElement("div");
     row.className = "sr sr" + (i < 3 ? i + 1 : 0) + (entry.me ? " me" : "");
     const label = document.createElement("span");
-    const rank = document.createElement("em"); rank.className = "srk"; rank.textContent = i < 3 ? ["🥇", "🥈", "🥉"][i] : String(i + 1);
+    const rank = document.createElement("em"); rank.className = "srk"; rank.textContent = String(i + 1);
     const name = document.createElement("b"); name.textContent = String(entry.name ?? "???").slice(0, 14); if (entry.me) name.style.color = "#ffd23d";
     const modeEl = document.createElement("small"); modeEl.style.color = "var(--dim)"; modeEl.textContent = ` ${modeLabel(entry.mode)}`;
     label.append(rank, name, modeEl);
@@ -10576,7 +10609,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-17 23:10";
+const BUILD_STAMP = "2026-11-18 15:50";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
