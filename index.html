@@ -10576,7 +10576,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-17 22:55";
+const BUILD_STAMP = "2026-11-17 23:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11312,7 +11312,7 @@ safeClick("pfCode", () => $("acctShow").click());
 safeClick("pfLogin", async () => { await $("acctLogin").onclick(); renderProfile(); });
 
 // ---------- Pinki: segunda mascota (conejita verde y lila, mejor amiga de Tetra) ----------
-var PET_KEY = "handtrix-pet-v1", PET_HOSTS = ["tetraHost", "tetraGame", "petHost", "pfPet"];
+var PET_KEY = "handtrix-pet-v1", PET_HOSTS = ["tetraHost", "tetraGame", "petHost", "pfPet", "hmPetC"];
 var PINKI_UNLOCK_LEVEL = 1;   // poné 21 para que se desbloquee al llegar al Reino Violeta (donde conoció a Tetra)
 function activePet() { try { if (!PET_KEY) return "tetra"; return localStorage.getItem(PET_KEY) === "pinki" && pinkiUnlocked() ? "pinki" : "tetra"; } catch (e) { return "tetra"; } }
 function pinkiUnlocked() { try { return adventureProgress.maxLevel >= PINKI_UNLOCK_LEVEL; } catch (e) { return true; } }
