@@ -2728,7 +2728,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .mp-title h2{font-size:15px!important;padding:16px 30px 16px 33%!important}
 .mp-pager{margin-top:-2px}
 .mp-scroll{border:0!important;box-shadow:none!important;border-radius:14px!important}
-.mp-stage{height:max(300px,calc(100dvh - 410px))!important}
+.mp-stage{height:max(250px,calc(100dvh - 480px))!important}
 #mpStage .mi{width:13.4cqh!important}
 #mpStage .mi .mi-badge b{font-size:3.1cqh!important}
 .mp-panel{margin-top:-18px;padding:8px!important}
@@ -10711,7 +10711,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-19 03:40";
+const BUILD_STAMP = "2026-11-19 04:00";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
