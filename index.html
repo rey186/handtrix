@@ -2868,6 +2868,16 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .home-collection-link>i.ic{display:block;margin:0 auto 6px;width:64px;height:64px;font-size:0}
 .home-collection-link b{color:#ffe27a!important}
 .home-collection-link small{color:#d7ceff!important}
+
+/* Pantalla de partida (rediseño) */
+.top .stat{position:relative!important;z-index:5!important}
+.top .stat,.top .pieces>div{clip-path:none!important;border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;box-shadow:0 2px 0 #1a0850!important;color:#e4dcff!important}
+.top .stat b{color:#fff!important}
+.top .record-stat{border-color:#3dffb4!important}
+#bPause{clip-path:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;background:none!important;box-shadow:none!important;color:#00364d!important;-webkit-text-fill-color:#00364d!important;text-shadow:none!important;font-weight:900!important;border-radius:0!important;padding:0 6px!important;min-height:0!important}
+.power-btn{border:3px solid #f5b800!important;border-radius:18px!important;box-shadow:0 3px 0 #1a0850!important}
+.next-boss{border:2px solid #f5b800!important;background:linear-gradient(180deg,rgba(106,46,224,.9),rgba(42,14,110,.95))!important;border-radius:999px!important;clip-path:none!important}
+.board-wrap canvas#board{border:3px solid #f5b800!important;border-radius:14px!important;box-shadow:0 0 18px rgba(245,184,0,.35)}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -10872,7 +10882,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 01:10";
+const BUILD_STAMP = "2026-11-20 09:45";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
