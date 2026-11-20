@@ -2859,6 +2859,15 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .seg button.active{background:var(--ui-verde) center/100% 100% no-repeat!important;color:#073000!important;box-shadow:none!important;text-shadow:none!important}
 .browser>*{border-color:#f5b800!important}
 #albumBack,#achBack{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
+
+/* Colección (pestaña del menú) */
+#homeCollection .home-section-head b{color:#ffe27a!important;display:flex;align-items:center;gap:8px}
+#homeCollection .home-section-head span{color:#d7ceff!important}
+.home-collection-link{position:relative;isolation:isolate;border:14px solid transparent!important;border-image:var(--m-panel) 52 fill/14px stretch!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:14px 6px!important}
+.home-collection-link::before{content:"";position:absolute;inset:-8px;border-radius:14px;background:linear-gradient(180deg,rgba(14,2,52,.62),rgba(8,0,36,.78));z-index:-1;pointer-events:none}
+.home-collection-link>i.ic{display:block;margin:0 auto 6px;width:64px;height:64px;font-size:0}
+.home-collection-link b{color:#ffe27a!important}
+.home-collection-link small{color:#d7ceff!important}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -3517,8 +3526,8 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
           <button class="home-rank-link" id="btnScores"><span class="ic ic-copa"></span> Ver clasificación y récords ›</button>
           </section>
           <section class="home-section" id="homeCollection" aria-label="Colección" hidden>
-            <div class="home-section-head"><b>📚 Colección</b><span>Objetos, apariencias, logros y descubrimientos.</span></div>
-            <button class="hub-tile home-collection-link" id="goCollectionFull" type="button"><i>🗂️</i><b>Álbum, logros y perfil</b><small>Ver lo que desbloqueaste y tu trayectoria.</small></button>
+            <div class="home-section-head"><b><span class="ic ic-cofre"></span> Colección</b><span>Objetos, apariencias, logros y descubrimientos.</span></div>
+            <button class="hub-tile home-collection-link" id="goCollectionFull" type="button"><i class="ic ic-cofre"></i><b>Álbum, logros y perfil</b><small>Ver lo que desbloqueaste y tu trayectoria.</small></button>
           </section>
           <div class="home-footer">TU DESTREZA · TU MEJOR ARMA</div>
         </div>
@@ -10863,7 +10872,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 00:40";
+const BUILD_STAMP = "2026-11-20 01:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
