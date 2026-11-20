@@ -2829,7 +2829,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 
 /* Ajustes (rediseño) */
 #pgSettings .q-top{width:100%;box-sizing:border-box}
-#qBackTop3{width:52px;height:48px;flex:none;border:0!important;border-image:none!important;padding:0!important;font-size:0!important;background:var(--m-bk) center/contain no-repeat!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+#qBackTop4,#qBackTop3{width:52px;height:48px;flex:none;border:0!important;border-image:none!important;padding:0!important;font-size:0!important;background:var(--m-bk) center/contain no-repeat!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .cfg-card{position:relative;isolation:isolate;border:14px solid transparent!important;border-image:var(--m-panel) 52 fill/14px stretch!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:2px 4px 6px!important}
 .cfg-card::before{content:"";position:absolute;inset:-8px;border-radius:14px;background:linear-gradient(180deg,rgba(14,2,52,.62),rgba(8,0,36,.78));z-index:-1;pointer-events:none}
 .cfg-wrap{gap:18px!important}
@@ -2870,6 +2870,18 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .home-collection-link small{color:#d7ceff!important}
 
 /* Pantalla de partida (rediseño) */
+/* Mascotas */
+#pgPets .q-top,#pgPets .q-sub{width:100%;box-sizing:border-box}
+#pgPets .hub-daily{border:2px solid #f5b800!important;border-radius:16px!important;background:linear-gradient(180deg,rgba(60,24,150,.92),rgba(30,8,86,.94))!important;box-shadow:0 3px 0 #1a0850!important}
+#pgPets .pet-sel button{border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important;box-shadow:0 3px 0 #1a0850}
+#pgPets .pet-sel button.on{background:linear-gradient(180deg,#f5b800,#c98a00 55%,#8a5a00)!important;color:#2a1600!important;border-color:#fff3b0!important}
+#pgPets .hs-head,#pgPets .hs-head span{color:#ffd86b!important}
+#pgPets .ps,#pgPets .pet-look{border:1px solid rgba(245,184,0,.45)!important;border-radius:12px!important;background:rgba(20,6,70,.7)!important}
+#pgPets .ps.cur{border:2px solid #f5b800!important;background:linear-gradient(180deg,rgba(106,46,224,.55),rgba(42,14,110,.7))!important;box-shadow:0 0 12px rgba(245,184,0,.35)}
+#pgPets .ss-bar{border:2px solid #f5b800!important;border-radius:999px!important;background:#1a0850!important}
+#pgPets .pet-btns .btn{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#073000!important;min-height:52px;font-weight:800!important;clip-path:none!important}
+#pgPets #backP,#pgPets #pinkiPick{clip-path:none!important}
+#pgPets #backP{border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;background:none!important;box-shadow:none!important;color:#00364d!important;font-weight:800!important;margin:8px auto 0;display:block}
 /* Pase de Temporada */
 #pgSeason .sn-wallet>span{border:2px solid #f5b800!important;border-radius:999px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important;box-shadow:0 2px 0 #1a0850}
 #pgSeason .sn-hero{border:2px solid #f5b800!important;border-radius:18px!important;box-shadow:0 0 18px rgba(245,184,0,.3)}
@@ -3656,7 +3668,7 @@ html body .pad button,html body .pad button[id]{clip-path:none!important;border:
         </div>
       </div>
       <div class="pg" id="pgPets" hidden>
-        <h2 class="pg-title">🦊 Mascotas</h2><p class="pg-sub" id="petSub">Todo sobre Tetra: evolución, ventajas y vestuario.</p>
+        <div class="q-top"><button class="mp-back" id="qBackTop4" aria-label="Volver"></button><div class="q-ban"><h2>MASCOTAS</h2></div></div><p class="pg-sub q-sub" id="petSub">Todo sobre Tetra: evolución, ventajas y vestuario.</p>
         <div class="pet-sel" id="petSel"><button data-pet="tetra">🦊 Tetra</button><button data-pet="pinki">🐰 Pinki</button></div>
         <section class="hub-daily" id="hubPinki" hidden>
           <div class="pet-stage"><div class="tetra pet-host" id="pinkiHost"></div>
@@ -10934,7 +10946,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 17:10";
+const BUILD_STAMP = "2026-11-20 17:40";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11348,7 +11360,7 @@ safeClick("seasonBanner", () => {
 });
 safeClick("goPets", () => { showPage("pets"); try { renderPetPage(); } catch (e) { console.warn(e); } });
 safeClick("qBackTop3", () => $("backHome2").click());
-["backQ", "backS", "backP", "qBackTop", "qBackTop2"].forEach(id => safeClick(id, () => showPage("home")));
+["backQ", "backS", "backP", "qBackTop", "qBackTop2", "qBackTop4"].forEach(id => safeClick(id, () => showPage("home")));
 safeClick("petWardrobe", () => openShopTetra("tetra"));
 safeClick("petPacks", () => { openShopTetra("tetra"); setTimeout(() => { $("shopList").querySelectorAll(".shop-sec").forEach(x => { if (x.textContent.includes("Packs")) x.scrollIntoView({ block: "start" }); }); }, 60); });
 { const _rh3 = refreshHome; refreshHome = function () { _rh3.apply(this, arguments); try { renderHomeBadges(); } catch (e) { console.warn(e); } }; }
