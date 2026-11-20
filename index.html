@@ -2824,6 +2824,20 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .shop-item .buy:not(:disabled){background:var(--ui-verde) center/100% 100% no-repeat!important;color:#073000!important;-webkit-text-fill-color:#073000!important;text-shadow:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding-bottom:6px!important;min-height:48px}
 .shop-item .buy:disabled{background:#241466!important;border:2px solid #6a55c8!important;color:#a99ee0!important}
 #chestShop .shop-tabs button{border:2px solid #f5b800!important}
+
+/* Ajustes (rediseño) */
+#pgSettings .q-top{width:100%;box-sizing:border-box}
+#qBackTop3{width:52px;height:48px;flex:none;border:0!important;border-image:none!important;padding:0!important;font-size:0!important;background:var(--m-bk) center/contain no-repeat!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.cfg-card{position:relative;isolation:isolate;border:14px solid transparent!important;border-image:var(--m-panel) 52 fill/14px stretch!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:2px 4px 6px!important}
+.cfg-card::before{content:"";position:absolute;inset:-8px;border-radius:14px;background:linear-gradient(180deg,rgba(14,2,52,.62),rgba(8,0,36,.78));z-index:-1;pointer-events:none}
+.cfg-wrap{gap:18px!important}
+.cfg-h{color:#ffe27a!important}
+.cfg-h .ci{stroke:#ffe27a!important}
+.cfg-sel{border:2px solid #f5b800!important;background-color:#3b1494!important}
+.cfg-row.cfg-tg{border:2px solid rgba(245,184,0,.7)!important;background:linear-gradient(180deg,#4d1fb8,#2a0e6e)!important}
+.skin-row>*{border:2px solid #f5b800!important;background:linear-gradient(180deg,#4d1fb8,#2a0e6e)!important}
+.skin-row>.sel{border-color:#3dffb4!important;box-shadow:0 0 14px rgba(61,255,180,.75)!important;background:linear-gradient(180deg,#6a2ee0,#3b1494)!important}
+#backHome2{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -3641,10 +3655,8 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <button class="btn ghost small" id="backHome3">‹ Volver</button>
       </div>
       <div class="pg" id="pgSettings" hidden>
-        <div class="cfg-head">
-          <div class="cfg-titles"><div class="cfg-logo">HANDTRIX</div><div class="cfg-sub">CONFIGURACIÓN</div></div>
-          <div class="cfg-tetra" id="cfgTetra" aria-hidden="true"></div>
-        </div>
+        <div class="q-top"><button class="mp-back" id="qBackTop3" aria-label="Volver"></button><div class="q-ban"><h2>AJUSTES</h2></div></div>
+        <div class="cfg-head" style="display:none"><div class="cfg-tetra" id="cfgTetra" aria-hidden="true"></div></div>
       <div class="cfg-wrap">
       <section class="cfg-card"><h3 class="cfg-h"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7zM3 7l9 5 9-5M12 12v10"/></svg>Tema de piezas</h3>
         <div class="skin-row" id="skinRow"></div></section>
@@ -10827,7 +10839,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-19 23:40";
+const BUILD_STAMP = "2026-11-19 23:55";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11240,6 +11252,7 @@ safeClick("seasonBanner", () => {
   try { renderQuests(); renderSeasonPage(); $("seasonNote").innerHTML = "<b>¿Cómo gano XP?</b> Limpiando líneas, jugando partidas, derrotando jefes y minijefes, haciendo Tetris y reclamando misiones semanales.<br><b>Exclusivos:</b> el marco (nivel 5) y la estela (nivel 8) de este mes quedan tuyos para siempre. Los equipás en Tienda → Tablero."; } catch (e) { console.warn(e); }
 });
 safeClick("goPets", () => { showPage("pets"); try { renderPetPage(); } catch (e) { console.warn(e); } });
+safeClick("qBackTop3", () => $("backHome2").click());
 ["backQ", "backS", "backP", "qBackTop", "qBackTop2"].forEach(id => safeClick(id, () => showPage("home")));
 safeClick("petWardrobe", () => openShopTetra("tetra"));
 safeClick("petPacks", () => { openShopTetra("tetra"); setTimeout(() => { $("shopList").querySelectorAll(".shop-sec").forEach(x => { if (x.textContent.includes("Packs")) x.scrollIntoView({ block: "start" }); }); }, 60); });
