@@ -2308,8 +2308,8 @@ body #next,body #hold{border:2px solid #b05bff!important;border-radius:9px!impor
  background:linear-gradient(180deg,#1b3a80,#0a1236)!important;box-shadow:none!important;min-height:46px}
 .pad button:active{background:linear-gradient(180deg,#2f6fe0,#12297a)!important;border-color:#fff!important}
 .pad #bRot{border-color:#b05bff!important;background:linear-gradient(180deg,#44207e,#140a36)!important}
-.pad #bHard{border-color:#ff3d5a!important;background:linear-gradient(180deg,#701530,#1c0612)!important}
-.pad #bHold{border-color:#ffb82e!important;background:linear-gradient(180deg,#6a4608,#1c1204)!important}
+body .pad #bHard{border-color:#ff3d5a!important;background:linear-gradient(180deg,#701530,#1c0612)!important}
+body .pad #bHold{border-color:#ffb82e!important;background:linear-gradient(180deg,#6a4608,#1c1204)!important}
 /* Pausar (44 px mínimo) y poder */
 #bPause{min-height:44px!important;min-width:92px!important;padding:0 16px!important;font-size:14px!important;border-radius:0!important;border:2px solid #38e8ff!important;color:#fff!important;
  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);
@@ -2870,6 +2870,12 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .home-collection-link small{color:#d7ceff!important}
 
 /* Pantalla de partida (rediseño) */
+.mission-card{clip-path:none!important;border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(60,24,150,.92),rgba(30,8,86,.94))!important;box-shadow:0 3px 0 #1a0850!important;color:#e4dcff!important}
+.mission-card .mission-title{color:#fff!important}
+body .pad button,body .pad button[id]{clip-path:none!important;border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;box-shadow:0 3px 0 #1a0850!important;color:#fff!important;font-weight:800!important}
+.pad button:active{transform:translateY(3px)!important;box-shadow:0 0 0 #1a0850!important}
+.pad #bHard{background:linear-gradient(180deg,#e0344f,#a31630 55%,#6e0c20)!important}
+.pad #bHold{background:linear-gradient(180deg,#f5b800,#c98a00 55%,#8a5a00)!important;color:#2a1600!important}
 .top .stat{position:relative!important;z-index:5!important}
 .top .stat,.top .pieces>div{clip-path:none!important;border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;box-shadow:0 2px 0 #1a0850!important;color:#e4dcff!important}
 .top .stat b{color:#fff!important}
@@ -10882,7 +10888,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 09:45";
+const BUILD_STAMP = "2026-11-20 10:20";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
