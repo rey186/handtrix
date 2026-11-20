@@ -2796,6 +2796,22 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .home-rank-link{border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;background:none!important;color:#00364d!important;font-weight:900!important;min-height:0!important;padding:2px 8px!important;border-radius:0!important;display:flex;align-items:center;justify-content:center;gap:6px}
 .home-rank-link{text-shadow:none!important;-webkit-text-fill-color:#00364d!important;letter-spacing:.02em}
 .hb-list>div{font-size:10px!important}.hb-list b{font-size:12px!important}
+
+/* Colección (rediseño) */
+#pgCollection .col-head{display:none!important}
+#pgCollection .q-top,#pgCollection .q-sub{width:100%;box-sizing:border-box}
+#qBackTop2{width:52px;height:48px;flex:none;border:0!important;border-image:none!important;padding:0!important;font-size:0!important;background:var(--m-bk) center/contain no-repeat!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.col-card{position:relative;isolation:isolate;border:14px solid transparent!important;border-image:var(--m-panel) 52 fill/14px stretch!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:4px 6px!important}
+.col-card::before{content:"";position:absolute;inset:-8px;border-radius:14px;background:linear-gradient(180deg,rgba(14,2,52,.62),rgba(8,0,36,.78));z-index:-1;pointer-events:none}
+.col-list{gap:18px!important}
+.cc-art{background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;border:2px solid #f5b800!important;border-radius:18px!important}
+.cc-t{color:#ffe27a!important}
+.cc-chip{background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;border:2px solid #f5b800!important;color:#fff!important}
+.cc-chip em{color:#fff!important}
+.cc-bar{border:2px solid #f5b800!important;height:13px!important;border-radius:9px!important}
+.cc-go{background:var(--ui-verde) center/100% 100% no-repeat;color:#073000!important;padding:8px 16px 10px;font-weight:900!important;text-shadow:none}
+.cc-tag{background:var(--m-pill) center/100% 100% no-repeat!important;border:0!important;color:#fff!important;padding:6px 14px!important;top:-30px!important;right:8px!important}
+#backHome3{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -3581,7 +3597,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
         <button class="btn ghost small" id="backHome1">‹ Volver</button>
       </div>
       <div class="pg" id="pgCollection" hidden>
-        <div class="col-head"><div class="col-logo">HANDTRIX</div><div class="col-title">COLECCIÓN</div><div class="col-sub">Todo lo que descubriste, ordenado.</div></div>
+        <div class="q-top"><button class="mp-back" id="qBackTop2" aria-label="Volver"></button><div class="q-ban"><h2>COLECCIÓN</h2></div></div><div class="q-sub">Todo lo que descubriste, ordenado.</div>
         <div class="col-list">
           <button class="col-card c-album" id="btnBossGallery" type="button">
             <span class="cc-art"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 8l10 12M54 8L44 20" stroke="#ffd23d" stroke-width="5" stroke-linecap="round"/><path d="M14 22c0-9 8-14 18-14s18 5 18 14v14c0 11-8 20-18 20s-18-9-18-20z" fill="#7a2ab0" stroke="#d9b3ff" stroke-width="3"/><path d="M20 30l9 4-9 4zM44 30l-9 4 9 4z" fill="#38e8ff"/><path d="M22 46h20l-3 6H25z" fill="#1a0c44" stroke="#d9b3ff" stroke-width="2"/></svg></span>
@@ -10799,7 +10815,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-19 15:50";
+const BUILD_STAMP = "2026-11-19 23:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11212,7 +11228,7 @@ safeClick("seasonBanner", () => {
   try { renderQuests(); renderSeasonPage(); $("seasonNote").innerHTML = "<b>¿Cómo gano XP?</b> Limpiando líneas, jugando partidas, derrotando jefes y minijefes, haciendo Tetris y reclamando misiones semanales.<br><b>Exclusivos:</b> el marco (nivel 5) y la estela (nivel 8) de este mes quedan tuyos para siempre. Los equipás en Tienda → Tablero."; } catch (e) { console.warn(e); }
 });
 safeClick("goPets", () => { showPage("pets"); try { renderPetPage(); } catch (e) { console.warn(e); } });
-["backQ", "backS", "backP", "qBackTop"].forEach(id => safeClick(id, () => showPage("home")));
+["backQ", "backS", "backP", "qBackTop", "qBackTop2"].forEach(id => safeClick(id, () => showPage("home")));
 safeClick("petWardrobe", () => openShopTetra("tetra"));
 safeClick("petPacks", () => { openShopTetra("tetra"); setTimeout(() => { $("shopList").querySelectorAll(".shop-sec").forEach(x => { if (x.textContent.includes("Packs")) x.scrollIntoView({ block: "start" }); }); }, 60); });
 { const _rh3 = refreshHome; refreshHome = function () { _rh3.apply(this, arguments); try { renderHomeBadges(); } catch (e) { console.warn(e); } }; }
