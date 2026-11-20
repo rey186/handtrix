@@ -2812,6 +2812,18 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .cc-go{background:var(--ui-verde) center/100% 100% no-repeat;color:#073000!important;padding:8px 16px 10px;font-weight:900!important;text-shadow:none}
 .cc-tag{background:var(--m-pill) center/100% 100% no-repeat!important;border:0!important;color:#fff!important;padding:6px 14px!important;top:-30px!important;right:8px!important}
 #backHome3{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
+
+/* Tienda (rediseño) */
+#chestShop .shop-back{background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;-webkit-text-fill-color:#00364d!important;text-shadow:none!important;font-weight:900!important;min-height:0!important;padding:0 8px!important;border-radius:0!important}
+#chestShop .shop .wallet .coin,#chestShop .coin{border:3px solid #f5b800!important;border-image:none!important;border-radius:999px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;box-shadow:0 3px 0 #1a0850!important;padding:8px 14px!important}
+#chestShop .coin b{color:#fff!important;text-shadow:none!important}
+#chestShop .coin small{color:#e4dcff!important}
+#chestShop .shop-ttl h2{filter:none}
+#chestShop .deal{border:3px solid #f5b800!important}
+#chestShop .hsec button.more,#chestShop .hsec .more{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;color:#073000!important;-webkit-text-fill-color:#073000!important;text-shadow:none!important;font-weight:900!important;padding:8px 14px 10px!important;min-height:0!important;box-shadow:none!important}
+.shop-item .buy:not(:disabled){background:var(--ui-verde) center/100% 100% no-repeat!important;color:#073000!important;-webkit-text-fill-color:#073000!important;text-shadow:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding-bottom:6px!important;min-height:48px}
+.shop-item .buy:disabled{background:#241466!important;border:2px solid #6a55c8!important;color:#a99ee0!important}
+#chestShop .shop-tabs button{border:2px solid #f5b800!important}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -10815,7 +10827,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-19 23:10";
+const BUILD_STAMP = "2026-11-19 23:40";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
