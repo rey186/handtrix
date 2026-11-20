@@ -5030,6 +5030,7 @@ function lock() {
     const comboShift = lastClearWasCombo ? Math.min(12, (comboCount + 1) * 2) : 0;   // el sonido sube de tono con cada combo
     audio.clear(cleared, comboShift);
     try { if (cleared >= 4) { haptic([30, 30, 30, 30, 70]); shakeBoard(); flashScreen("rgba(255,255,255,.28)", 220); } else if (cleared >= 2) { haptic([20, 30, 20]); if (cleared >= 3) shakeBoard(); } else haptic(14); } catch (e) { }
+    try { if (cleared >= 3 || comboCount >= 3) petReact("cheer"); } catch (e) { }
     try { tetraGameSay(cleared >= 4 ? "¡TETRIS! 🔥" : cleared === 3 ? "¡Triple!" : cleared === 2 ? "¡Doble!" : (comboCount >= 2 ? "¡Combo x" + (comboCount + 1) + "!" : null), cleared >= 2); } catch (e) { }
     if (lastClearWasCombo) { comboCount++; audio.combo(comboCount); } else comboCount = 1;
     lastClearWasCombo = true; if (comboCount > gs.maxCombo) gs.maxCombo = comboCount; if (cleared >= 4) gs.tetris++; if (spin) gs.tspins++;
@@ -5385,6 +5386,7 @@ function mountTetra() {
   h.onclick = () => tetraMenuTap(h);
 }
 let tetraGameT = 0;
+function petReact(k) { try { if (p3 && p3.root) p3.root.userData.react = { k, t: p3.t }; } catch (e) { } }
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
   try {
@@ -7000,7 +7002,7 @@ setInterval(() => {   // pulso de 1 s: peligro/jefe durante la partida
   try {
     if (running && !over && !paused && grid) {
       let top = ROWS; for (let r = 0; r < ROWS; r++) { if (grid[r] && grid[r].some(c => c)) { top = r; break; } }
-      const dg = top <= 5; if (dg && !plDangerOn) { plDanger++; plSay(PL.mood > 60 ? "danger" : "dangerS", 3, 2400); } else if (!dg && plDangerOn) plSay("relief", 2, 2200); plDangerOn = dg;
+      const dg = top <= 5; if (dg && !plDangerOn) { plDanger++; petReact("scare"); plSay(PL.mood > 60 ? "danger" : "dangerS", 3, 2400); } else if (!dg && plDangerOn) plSay("relief", 2, 2200); plDangerOn = dg;
       if (typeof bossActive === "boolean") { if (bossActive && !plBossSeen) { plBossSeen = true; plSay(skData.s.bosses >= 2 ? "bossB" : "boss", 4, 3000); } else if (!bossActive) plBossSeen = false; }
     }
   } catch (e) { }
@@ -8045,6 +8047,15 @@ function voxelPet(id, g, s, T) {
       if (tl) { tl.rotation.y = Math.sin(t * 2.0) * 0.28; tl.rotation.z = Math.sin(t * 1.5) * 0.06; }
       if (a0) a0.rotation.x = Math.sin(t * 2.2) * 0.12; if (a1) a1.rotation.x = -Math.sin(t * 2.2) * 0.12;
     }
+    if (ud.react && !ud.calm) {   // reacciones corporales: cheer (giro y brazos arriba), scare (tiembla, orejas atrás), sad (se encorva)
+      const rc = ud.react, q = t - rc.t, dur = rc.k === "sad" ? 2.8 : 1.6;
+      if (q < 0 || q > dur) { if (q > dur) ud.react = null; } else {
+        const e = Math.sin(Math.min(1, q / dur) * Math.PI);
+        if (rc.k === "cheer") { fx.rotation.y += Math.min(1, q / 1.1) * Math.PI * 2; fx.position.y += e * 0.9; if (a0) a0.rotation.x = -2.6 * e; if (a1) a1.rotation.x = -2.6 * e; if (h) h.rotation.x = -0.2 * e; }
+        else if (rc.k === "scare") { fx.rotation.z = Math.sin(q * 38) * 0.09 * e; fx.position.y *= 0.4; if (e0) e0.rotation.z += 0.5 * e; if (e1) e1.rotation.z -= 0.5 * e; if (h) h.rotation.x = -0.15 * e; }
+        else if (rc.k === "sad") { fx.position.y -= 0.5 * e; fx.rotation.y *= 1 - e; if (h) h.rotation.x = 0.55 * e; if (e0) e0.rotation.z += 0.8 * e; if (e1) e1.rotation.z -= 0.8 * e; if (a0) a0.rotation.x = 0.35 * e; if (a1) a1.rotation.x = 0.35 * e; }
+      }
+    }
     if (hl) hl.rotation.y = t * 0.9;
     if (groups.wings) groups.wings.position.y = Math.sin(t * 2.2) * 0.35;
     if (tl && groups.tail2) { groups.tail2.rotation.set(0, tl.rotation.y + 0.62, tl.rotation.z); groups.tail3.rotation.set(0, tl.rotation.y - 0.62, tl.rotation.z); }
@@ -8484,7 +8495,7 @@ function gameOver(reason = "top") {
   bossActive = false; b3dying = 0; clearSkills(); freezeMs = 0; $("boardWrap").classList.remove("frozen"); renderBoss();
   if (over) return;
   over = true; running = false; audio.stopMusic();
-  try { tetraGameSay(reason === "win" ? "¡Ganamos! 🎉" : "Ay… ¡la próxima va!", true); } catch (e) { }
+  try { petReact(reason === "win" ? "cheer" : "sad"); tetraGameSay(reason === "win" ? "¡Ganamos! 🎉" : "Ay… ¡la próxima va!", reason === "win"); } catch (e) { }
   if (reason === "win") audio.levelUp(); else audio.over();
   const record = score > best;
   if (record) { best = score; store.set(BESTKEY, String(best)); }
@@ -10992,7 +11003,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 19:00";
+const BUILD_STAMP = "2026-11-20 19:40";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
