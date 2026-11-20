@@ -2840,6 +2840,25 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .skin-row>*{border:2px solid #f5b800!important;background:linear-gradient(180deg,#4d1fb8,#2a0e6e)!important}
 .skin-row>.sel{border-color:#3dffb4!important;box-shadow:0 0 14px rgba(61,255,180,.75)!important;background:linear-gradient(180deg,#6a2ee0,#3b1494)!important}
 #backHome2{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
+
+/* Álbum y Logros (rediseño) */
+#menuAch .q-top{width:100%;box-sizing:border-box;margin:4px 0 8px}
+.alb-ban{width:100%;margin:4px 0 8px}
+.alb-ban h2,.q-ban h2{font-size:14px!important}
+#menuAch .ach-head{display:flex;align-items:center;justify-content:space-between;margin:2px 0}
+#menuAch .ach-head h2{display:none}
+.ach-sub{font:700 12px system-ui,sans-serif;color:#d7ceff}
+#menuAch .ach-pct{background:var(--m-pill) center/100% 100% no-repeat!important;color:#fff!important;padding:8px 18px!important;border-radius:0!important;font-size:16px!important}
+#menuAch .ach-bar,#albumBrowser .ach-bar{border:2px solid #f5b800!important}
+#menuAch .ach-filters button{border:2px solid #f5b800!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important}
+#menuAch .ach-filters button.on{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;color:#073000!important;text-shadow:none!important}
+#menuAch .ach-item{background:linear-gradient(180deg,#5a24c8,#2f0f80 60%,#240b66)!important;border:2px solid #f5b800!important;border-radius:16px!important}
+#menuAch .ach-item.got{border-color:#3dffb4!important;box-shadow:0 0 12px rgba(61,255,180,.6)}
+#menuAch .ach-cat{color:#ffe27a!important}
+.seg{border:2px solid #f5b800!important;background:rgba(20,6,60,.8)!important}
+.seg button.active{background:var(--ui-verde) center/100% 100% no-repeat!important;color:#073000!important;box-shadow:none!important;text-shadow:none!important}
+.browser>*{border-color:#f5b800!important}
+#albumBack,#achBack{margin:8px auto 0;display:block;background:none!important;box-shadow:none!important;border:14px solid transparent!important;border-image:var(--ui-btnon) 40 fill/14px stretch!important;color:#00364d!important;font-weight:900;padding:0 14px!important;min-height:0;text-shadow:none!important;-webkit-text-fill-color:#00364d}
 .home-rank-link .ic{width:1.5em;height:1.5em;vertical-align:0}
 
 /* Piezas de interfaz (set propio): podio, pestañas, filas */
@@ -3753,7 +3772,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
       <button class="btn ghost" id="helpBack">Volver</button>
     </div>
     <div id="menuAch" hidden>
-      <div class="ach-head"><h2>Logros</h2><div class="ach-pct" id="achPct">0%</div></div>
+      <div class="q-top"><div class="q-ban" style="flex:1"><h2>LOGROS</h2></div></div><div class="ach-head"><span class="ach-sub">Tus metas cumplidas</span><div class="ach-pct" id="achPct">0%</div></div>
       <div class="ach-bar"><i id="achBarFill"></i></div>
       <div class="ach-count" id="achCount"></div>
       <div class="ach-filters" id="achFilters" role="tablist"><button data-f="all" class="on">Todos</button><button data-f="done">Completados</button><button data-f="todo">Pendientes</button></div>
@@ -3803,7 +3822,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
       <button class="btn ghost" id="scoresBack">Volver</button>
     </div>
     <div id="menuBosses" class="sub-menu" hidden>
-      <h2 id="albumTitle" class="sub-title">📖 Álbum</h2>
+      <div class="q-ban alb-ban"><h2 id="albumTitle" class="sub-title">ÁLBUM</h2></div>
       <p id="albumCount" class="sub-count"></p>
       <div class="seg" id="albumTabs"><button class="active" id="albumBossTab">👹 Jefes</button><button id="albumMiniTab">👾 Minijefes</button></div>
       <div class="browser" id="albumBrowser"></div>
@@ -8216,7 +8235,7 @@ function setAlbumTab(tab) {
   albumTab = tab;
   $("albumBossTab").classList.toggle("active", tab === "boss");
   $("albumMiniTab").classList.toggle("active", tab === "mini");
-  $("albumTitle").textContent = tab === "boss" ? "📖 Álbum de jefes" : "📖 Álbum de minijefes";
+  $("albumTitle").textContent = tab === "boss" ? "ÁLBUM DE JEFES" : "ÁLBUM DE MINIJEFES";
   if (albumBossBr) albumBossBr.root.hidden = tab !== "boss";
   if (albumMiniBr) albumMiniBr.root.hidden = tab !== "mini";
 }
@@ -10844,7 +10863,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 00:10";
+const BUILD_STAMP = "2026-11-20 00:40";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
