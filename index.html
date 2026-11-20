@@ -2870,6 +2870,32 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 .home-collection-link small{color:#d7ceff!important}
 
 /* Pantalla de partida (rediseño) */
+/* Pase de Temporada */
+#pgSeason .sn-wallet>span{border:2px solid #f5b800!important;border-radius:999px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important;box-shadow:0 2px 0 #1a0850}
+#pgSeason .sn-hero{border:2px solid #f5b800!important;border-radius:18px!important;box-shadow:0 0 18px rgba(245,184,0,.3)}
+#pgSeason .sn-rew,#pgSeason .sn-card,#pgSeason .pet-note{border:2px solid #f5b800!important;border-radius:16px!important;background:linear-gradient(180deg,rgba(60,24,150,.92),rgba(30,8,86,.94))!important;box-shadow:0 3px 0 #1a0850}
+#pgSeason .sn-rh span{color:#fff!important}
+#pgSeason .sn-arr{border:2px solid #f5b800!important;border-radius:12px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important}
+#pgSeason .ss-tiers .tier{border:2px solid #6a2ee0!important;border-radius:14px!important;background:linear-gradient(180deg,#2a0e6e,#1a0850)!important}
+#pgSeason .ss-tiers .tier.ready{border-color:#f5b800!important}
+#pgSeason .sn-btn{white-space:nowrap!important;font-size:12px!important;padding:8px 12px!important;border-radius:12px!important;font-weight:800!important}
+#pgSeason .sn-card.pass .sn-btn{background:linear-gradient(180deg,#f5b800,#c98a00 55%,#8a5a00)!important;border:2px solid #fff3b0!important;color:#2a1600!important}
+#pgSeason .sn-card.miss .sn-btn{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;color:#073000!important;min-height:40px}
+#pgSeason .sn-cta{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;color:#073000!important;min-height:60px;box-shadow:none!important}
+/* Álbum: tarjeta grande */
+.br-detail{border:2px solid #f5b800!important;border-radius:18px!important;background:linear-gradient(180deg,rgba(60,24,150,.92),rgba(30,8,86,.94))!important;box-shadow:0 3px 0 #1a0850!important}
+.br-nav{border:2px solid #f5b800!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important}
+.br-row{background:rgba(20,6,70,.7)!important;border:1px solid rgba(245,184,0,.35)}
+.br-chip{border:2px solid #6a2ee0!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important}
+.br-chip.on{border-color:#f5b800!important}
+.br-act .btn{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;color:#073000!important;border-radius:0!important;box-shadow:none!important;min-height:46px;white-space:nowrap;font-size:12px!important}
+/* Tienda: Ver todo */
+.hsec button{border:2px solid #f5b800!important;border-radius:999px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important;font-weight:800!important;padding:4px 12px!important;box-shadow:0 2px 0 #1a0850}
+/* Pausa */
+#banner #bannerBtn{background:var(--ui-verde) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#073000!important;min-width:200px;min-height:56px;font-weight:800!important;clip-path:none!important}
+#banner .banner-audio button,#banner .banner-audio select{border:2px solid #f5b800!important;border-radius:14px!important;background:linear-gradient(180deg,#6a2ee0,#3b1494 55%,#2a0e6e)!important;color:#fff!important;box-shadow:0 3px 0 #1a0850}
+/* Game Over: título */
+#menu:has(#menuOver:not([hidden])) #menuTitle:not(.logo){position:relative;z-index:4;font-size:26px!important;margin-top:96px!important}
 /* Game Over */
 #menuOver{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(100%,380px);position:relative;z-index:2}
 #menuOver #overText{font-size:18px!important;font-weight:800;color:#fff!important;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 2px 0 #1a0850;margin:4px 0}
@@ -10908,7 +10934,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 10:55";
+const BUILD_STAMP = "2026-11-20 17:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
