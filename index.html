@@ -11098,7 +11098,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-21 09:18";
+const BUILD_STAMP = "2026-11-21 09:22";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11788,7 +11788,7 @@ function renderProfile() {
   const rk = careerRank(career.xp), within = career.xp % 500, st = tetraStage(), th = seasonTheme(ymNow()), tier = seasonTier(pass.xp);
   $("pfRank").textContent = `RANGO ${rk.n} · ${rk.name}`; $("pfLv").textContent = rk.n; $("pfXpTxt").textContent = `${within}/500 XP al próximo rango`; try { $("pfXpFill").style.width = Math.round(within / 500 * 100) + "%"; } catch (e) { }
   const C = 2 * Math.PI * 15.9; $("pfRing").innerHTML = `<circle cx="18" cy="18" r="15.9" fill="rgba(10,6,40,.6)" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="url(#pfXg)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="${(C * within / 500).toFixed(1)} ${C.toFixed(1)}"/><defs><linearGradient id="pfXg"><stop offset="0" stop-color="#38e8ff"/><stop offset="1" stop-color="#ff4fd8"/></linearGradient></defs>`;
-  try { const ph = $("pfPet"); if (ph && p3mount(ph, "tetra", 300)) { try { p3.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2.5)); p3.r.setSize(300, 300, false); p3.size = 300; } catch (e) { } p3.root.scale.setScalar(1.0); p3.root.position.y = 0.05; $("pfFox").hidden = true; } else { $("pfFox").hidden = false; paintFox($("pfFox"), st.id); } } catch (e) { try { $("pfFox").hidden = false; paintFox($("pfFox"), st.id); } catch (_) { } }
+  try { const ph = $("pfPet"); if (ph && p3mount(ph, "tetra", 300)) { try { p3.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2.5)); p3.r.setSize(300, 300, false); p3.size = 300; } catch (e) { } p3.root.scale.setScalar(0.92); p3.root.position.y = -0.3; $("pfFox").hidden = true; } else { $("pfFox").hidden = false; paintFox($("pfFox"), st.id); } } catch (e) { try { $("pfFox").hidden = false; paintFox($("pfFox"), st.id); } catch (_) { } }
   $("pfChips").innerHTML = `<span>🦊 Tetra ${st.name}</span><span>🌟 ${th.name} · Nv ${tier.t}/10</span><span>🔥 Racha ${streakNow()} d</span>`;
   const sc = getScores(), bestBy = {}; sc.forEach(e => { bestBy[e.mode] = Math.max(bestBy[e.mode] || 0, e.score || 0); });
   const bestAll = Math.max(career.best || 0, ...Object.values(bestBy), 0), stars = starsTotal(), ach = Object.keys(achState).filter(k => ACHIEVEMENTS[k]).length, achN = Object.keys(ACHIEVEMENTS).length, bosses = adventureProgress.bosses.length;
