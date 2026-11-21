@@ -5347,7 +5347,7 @@ function tetraLook() { try { const o = JSON.parse(localStorage.getItem("handtrix
 function tetraLookSave(o) { try { localStorage.setItem("handtrix-tetra-look-v1", JSON.stringify(o)); } catch (e) { } }
 // ---- Evolución de Tetra: gana XP jugando y cambia de etapa (aspecto + pequeñas ventajas) ----
 // ---- Tetra Guardián en 3D de alto detalle (GLB propio, ~35k triángulos; se carga aparte y si falla se usa el de cuentitas) ----
-let TETRA_GLB = null;
+let TETRA_GLB = null, tetraPreviewGlb = false;
 async function tetraGlbLoad() {
   try {
     if (TETRA_GLB) return; const T = THREE, buf = await (await fetch("./tetra_guardian.glb")).arrayBuffer(), dv = new DataView(buf);
@@ -8332,7 +8332,7 @@ function p3finish(s, id) {   // sombra de contacto, respiración y parpadeo (sol
 function p3mount(host, id, size) {
   const s = p3init(); if (!s) return false;
   try {
-    s.useGlb = !!(TETRA_GLB && id === "tetra" && host.id !== "hmPetC" && activePet() !== "pinki" && tetraStage().id === 2); p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
+    s.useGlb = !!(TETRA_GLB && id === "tetra" && host.id !== "hmPetC" && activePet() !== "pinki" && (tetraStage().id === 2 || (tetraPreviewGlb && host.id === "petHost"))); p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
     host.innerHTML = ""; host.appendChild(s.cv); const px = size || 150;
     if (s.size !== px) { s.r.setPixelRatio(Math.min(devicePixelRatio || 1, p3PixelRatio())); s.r.setSize(px, px, false); s.size = px; }
     p3finish(s, id); s.upd(0); s.r.render(s.sc, s.cam); if (!p3raf) { s.last = performance.now(); p3raf = requestAnimationFrame(p3loop); }
@@ -11031,7 +11031,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-21 00:10";
+const BUILD_STAMP = "2026-11-21 00:25";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
@@ -11425,9 +11425,11 @@ function renderHomeBadges() {
   let pb = false; try { const d = tetraData(); pb = tetraStageFor(d.xp).id > d.seen; } catch (e) { } $("pBadge").hidden = !pb;
 }
 function renderPetPage() {
-  renderTetraCard();
+  renderTetraCard(); tetraPreviewGlb = false;
   const d = tetraData(), cur = tetraStageFor(d.xp);
   $("petStages").innerHTML = TETRA_STAGES.map(s => `<div class="ps${s.id === cur.id ? " cur" : ""}${d.xp >= s.at ? " got" : ""}"><i>${d.xp >= s.at ? "✔" : "🔒"}</i><div><b>${s.name}</b><small>${s.at ? s.at.toLocaleString("es-AR") + " XP · " : ""}${stageTrait(s) ? stageTrait(s) + " · " : ""}${stagePerk(s)}</small></div></div>`).join("");
+  try { if (activePet() !== "pinki" && TETRA_GLB) { const row = $("petStages").children[2]; if (row) { row.style.cursor = "pointer"; const sm = row.querySelector("small"); if (sm) sm.insertAdjacentHTML("beforeend", " · <u>Tocá para ver el modelo 3D</u>");
+    row.onclick = () => { tetraPreviewGlb = !tetraPreviewGlb; try { const h = $("petHost"); h.hidden = false; if (p3mount(h, activePet(), 150)) { p3.root.scale.setScalar(.8 * stageFit()); p3.root.position.y = .1; } } catch (e) { } }; } } } catch (e) { }
   try {
     const L = tetraLook(), sk = (TETRA_SHOP.find(x => x.id === L.skin) || {}).name || "Cristal", ac = L.acc ? (TETRA_SHOP.find(x => x.id === L.acc) || {}).name : "ninguno";
     $("petLook").innerHTML = `<b>Vestuario actual</b><span>Color: ${sk} · Accesorio: ${ac}</span><span>Tenés ${L.owned.length} ${L.owned.length === 1 ? "prenda" : "prendas"} en tu colección.</span>`;
