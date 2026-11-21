@@ -1,5 +1,5 @@
 // HANDTRIX service worker. Subí el número de VERSION cuando cambies este archivo.
-const VERSION = '20261120-1940';
+const VERSION = '20261121-0010';
 const CACHE = "handtrix-" + VERSION;
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
@@ -8,7 +8,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("handtrix-") && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-const isHeavy = url => /\/vendor\//.test(url.pathname) || /three\.module\.js$/.test(url.pathname);
+const isHeavy = url => /\/vendor\//.test(url.pathname) || /three\.module\.js$/.test(url.pathname) || /\.glb$/.test(url.pathname);
 self.addEventListener("fetch", e => {
   const req = e.request; if (req.method !== "GET") return;
   const url = new URL(req.url); if (url.origin !== location.origin) return;   // Supabase, CDN, etc. van directo a la red

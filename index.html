@@ -5346,6 +5346,33 @@ function tetraSkinColors(id) { const T = { cristal: [0x34c3ff, 0x7b4dff, 0xff4fd
 function tetraLook() { try { const o = JSON.parse(localStorage.getItem("handtrix-tetra-look-v1") || "{}"); return { skin: o.skin || "cristal", acc: o.acc || "", owned: Array.isArray(o.owned) ? o.owned : [] }; } catch (e) { return { skin: "cristal", acc: "", owned: [] }; } }
 function tetraLookSave(o) { try { localStorage.setItem("handtrix-tetra-look-v1", JSON.stringify(o)); } catch (e) { } }
 // ---- Evolución de Tetra: gana XP jugando y cambia de etapa (aspecto + pequeñas ventajas) ----
+// ---- Tetra Guardián en 3D de alto detalle (GLB propio, ~35k triángulos; se carga aparte y si falla se usa el de cuentitas) ----
+let TETRA_GLB = null;
+async function tetraGlbLoad() {
+  try {
+    if (TETRA_GLB) return; const T = THREE, buf = await (await fetch("./tetra_guardian.glb")).arrayBuffer(), dv = new DataView(buf);
+    const jl = dv.getUint32(12, true), J = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, jl))), bin = new Uint8Array(buf, 20 + jl + 8);
+    const acc = i => { const a = J.accessors[i], v = J.bufferViews[a.bufferView], o = (v.byteOffset || 0) + (a.byteOffset || 0), n = { SCALAR: 1, VEC2: 2, VEC3: 3 }[a.type], C = a.componentType === 5125 ? Uint32Array : Float32Array; return new C(bin.buffer.slice(bin.byteOffset + o, bin.byteOffset + o + a.count * n * C.BYTES_PER_ELEMENT)); };
+    const p = J.meshes[0].primitives[0], geo = new T.BufferGeometry();
+    geo.setAttribute("position", new T.BufferAttribute(acc(p.attributes.POSITION), 3)); geo.setAttribute("normal", new T.BufferAttribute(acc(p.attributes.NORMAL), 3)); geo.setAttribute("uv", new T.BufferAttribute(acc(p.attributes.TEXCOORD_0), 2)); geo.setIndex(new T.BufferAttribute(acc(p.indices), 1));
+    const tex = async (i, srgb) => { const v = J.bufferViews[J.images[i].bufferView], o = v.byteOffset || 0, url = URL.createObjectURL(new Blob([bin.slice(o, o + v.byteLength)], { type: "image/jpeg" })), im = new Image(); im.src = url; await im.decode(); const t = new T.Texture(im); t.flipY = false; t.colorSpace = srgb ? T.SRGBColorSpace : T.NoColorSpace; t.anisotropy = 4; t.needsUpdate = true; return t; };
+    TETRA_GLB = { geo, map: await tex(0, true), nmap: await tex(1, false) };
+    try { plRemount(); } catch (e) { }
+  } catch (e) { TETRA_GLB = null; console.warn("tetra glb", e); }
+}
+setTimeout(tetraGlbLoad, 1800);
+function tetraGlbBuild(g, s, T) {
+  const d = TETRA_GLB, mat = new T.MeshStandardMaterial({ map: d.map, normalMap: d.nmap, roughness: 0.6, metalness: 0, emissive: 0xffffff, emissiveMap: d.map, emissiveIntensity: 0.42 }); mat.normalScale.set(0.6, 0.6); s.mats.push(mat);
+  const mesh = new T.Mesh(d.geo.clone(), mat), body = new T.Group(); mesh.scale.setScalar(2.4); mesh.position.y = -0.19; body.add(mesh); g.add(body);
+  return t => {
+    const ud = g.userData || {}, hop = ud.hop != null && t - ud.hop < 1.4;
+    let y = Math.max(0, Math.sin(t * 2.2)) * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.55 : 0), ry = Math.sin(t * 0.8) * 0.4, rx = 0, rz = 0, sy = 1;
+    const rc = ud.react;
+    if (rc && !ud.calm) { const q = t - rc.t, dur = rc.k === "sad" ? 2.8 : 1.6; if (q > dur) ud.react = null; else if (q >= 0) { const e = Math.sin(Math.min(1, q / dur) * Math.PI);
+      if (rc.k === "cheer") { ry += Math.min(1, q / 1.1) * Math.PI * 2; y += e * 0.5; } else if (rc.k === "scare") { rz = Math.sin(q * 38) * 0.07 * e; y *= 0.4; } else if (rc.k === "sad") { y -= 0.1 * e; rx = 0.25 * e; sy = 1 - 0.06 * e; ry *= 1 - e; } } }
+    body.position.y = y; body.rotation.set(rx, ry, rz); body.scale.set(1, sy * (1 + Math.sin(t * 1.9) * 0.012), 1);
+  };
+}
 const TETRA_XP_KEY = "handtrix-tetra-xp-v1";
 const TETRA_STAGES = [
   { id: 0, name: "Cachorro",   at: 0,    scale: 0.80, perk: "Sin ventajas todavía", trait: "Zorro de cristal original" },
@@ -8086,7 +8113,8 @@ function p3build(id) {
   };
   const poly = (pts, depth, mat, bevel) => { const sh = new T.Shape(); pts.forEach(([x, y], k) => k ? sh.lineTo(x, y) : sh.moveTo(x, y)); sh.lineTo(pts[0][0], pts[0][1]); const geo = new T.ExtrudeGeometry(sh, { depth, bevelEnabled: !!bevel, bevelSize: 0.06, bevelThickness: 0.06, bevelSegments: 1 }); geo.translate(0, 0, -depth / 2); return new T.Mesh(geo, mat); };
   let upd = () => { }, vxUpd = null;
-  if (id === "tetra" || id === "pinki") { try { vxUpd = voxelPet(id, g, s, T); g.userData.voxel = !!vxUpd; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("voxel", e); } }
+  if (id === "tetra" && s.useGlb && TETRA_GLB) { try { vxUpd = tetraGlbBuild(g, s, T); g.userData.voxel = true; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("glb", e); } }
+  if (!vxUpd && (id === "tetra" || id === "pinki")) { try { vxUpd = voxelPet(id, g, s, T); g.userData.voxel = !!vxUpd; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("voxel", e); } }
   if (vxUpd) { upd = vxUpd; } else if (id === "coins") {   // bolsa de terciopelo violeta con ribetes de oro, soga con gemas y monedas con rombo
     const gold = M(0xffc22e, 0.5, { metalness: 0.95, roughness: 0.22 }), gold2 = M(0xfff0a0, 0.75, { metalness: 0.9, roughness: 0.2 }), vel = M(0x6b1466, 0.3, { roughness: 0.85, metalness: 0.05, flatShading: false }), vel2 = M(0x8c1f80, 0.35, { roughness: 0.85, metalness: 0.05, flatShading: false, side: T.DoubleSide });
     glow(0xffb52e, 7, 0.6); const bag = new T.Group(); g.add(bag);
@@ -8304,7 +8332,7 @@ function p3finish(s, id) {   // sombra de contacto, respiración y parpadeo (sol
 function p3mount(host, id, size) {
   const s = p3init(); if (!s) return false;
   try {
-    p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
+    s.useGlb = !!(TETRA_GLB && id === "tetra" && host.id !== "hmPetC" && activePet() !== "pinki" && tetraStage().id === 2); p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
     host.innerHTML = ""; host.appendChild(s.cv); const px = size || 150;
     if (s.size !== px) { s.r.setPixelRatio(Math.min(devicePixelRatio || 1, p3PixelRatio())); s.r.setSize(px, px, false); s.size = px; }
     p3finish(s, id); s.upd(0); s.r.render(s.sc, s.cam); if (!p3raf) { s.last = performance.now(); p3raf = requestAnimationFrame(p3loop); }
@@ -11003,7 +11031,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-20 19:40";
+const BUILD_STAMP = "2026-11-21 00:10";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
