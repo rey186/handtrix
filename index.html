@@ -2873,6 +2873,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 html body.nocam .pieces > div::before { left:9px !important; top:6px !important; font-size:7px !important; letter-spacing:.06em !important; }
 html body.nocam .top { padding-right:6px !important; box-sizing:border-box; }
 html body.nocam .pieces > div:last-child { margin-right:2px; }
+html body .tgame { width:128px !important; height:128px !important; }
 /* Pantalla de partida (rediseño) */
 /* Diálogos */
 .chest-box,.lg-box,.dm-box,.ww-box,.control-choice,#chModal>div,#passModal>div,#calib{border:3px solid #f5b800!important;border-radius:20px!important;background:linear-gradient(180deg,rgba(60,24,150,.96),rgba(30,8,86,.98))!important;box-shadow:0 0 24px rgba(245,184,0,.3),0 4px 0 #1a0850!important;clip-path:none!important}
@@ -5483,7 +5484,7 @@ window.__petReact = petReact;
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
   try {
-    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 86)) { h.hidden = true; return; } p3.root.scale.setScalar(0.74); p3.root.position.y = 0.15; }
+    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 128)) { h.hidden = true; return; } p3.root.scale.setScalar(0.9); p3.root.position.y = 0.15; }
     h.style.pointerEvents = "none";   // la mascota no intercepta toques de los controles
     if (hop && p3 && p3.root) p3.root.userData.hop = p3.t;
     if (msg) { let tp = h.querySelector(".tip"); if (!tp) { tp = document.createElement("div"); tp.className = "tip"; h.appendChild(tp); } tp.textContent = msg; tipSide(h, tp); clearTimeout(h._t); h._t = setTimeout(() => tp.remove(), 2400); }
@@ -11097,7 +11098,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-21 09:05";
+const BUILD_STAMP = "2026-11-21 09:14";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
