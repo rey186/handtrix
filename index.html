@@ -5402,12 +5402,17 @@ function tetraRigBuild(g, s, T) {
   const extra = d.nodes.map((n, i) => /^Bone_/.test(n.name || "") && d.joints.includes(i) ? i : -1).filter(i => i >= 0);
   const E = new T.Euler(), Q = new T.Quaternion(), bi = new Map(); d.nodes.forEach((n, i) => bi.set(bones[i], i));
   const rot = (b, x, y, z) => { if (!b) return; const i = bi.get(b); E.set(x, y, z); Q.setFromEuler(E); b.quaternion.copy(rest[i]).multiply(Q); };
+  // rotación en ejes del MUNDO (independiente de cómo estén orientados los huesos del GLB)
+  const par = d.nodes.map(() => -1); d.nodes.forEach((n, i) => (n.children || []).forEach(c => { par[c] = i; }));
+  const pwq = new Array(d.nodes.length), qI = new T.Quaternion(), pwOf = i => { if (pwq[i]) return pwq[i]; const pi = par[i]; pwq[i] = pi < 0 ? qI.clone() : pwOf(pi).clone().multiply(rest[pi]); return pwq[i]; };
+  const Qa = new T.Quaternion(), Qb = new T.Quaternion();
+  const rotW = (b, x, y, z) => { if (!b) return; const i = bi.get(b), P = pwOf(i); E.set(x, y, z); Qa.setFromEuler(E); Qb.copy(P).invert().multiply(Qa).multiply(P); b.quaternion.copy(Qb).multiply(rest[i]); };
   // clips (en el lugar: sin traslación de la cadera)
   const mixer = new T.AnimationMixer(mesh), clips = {};
   d.anims.forEach(a => { const tr = []; a.ch.forEach(c => { if (c.path === "translation" && c.node === d.joints[0]) return; const nmn = "n" + c.node + "." + (c.path === "rotation" ? "quaternion" : c.path === "translation" ? "position" : "scale"); tr.push(new (c.path === "rotation" ? T.QuaternionKeyframeTrack : T.VectorKeyframeTrack)(nmn, Array.from(c.t), Array.from(c.v))); }); clips[a.name] = new T.AnimationClip(a.name, -1, tr); });
   g.userData.rig = { bones, byName, mixer, clips, mesh, pivot };
   let act = null, lastT = null, clipUntil = 0;
-  let walkK = 0, ph = 0, yawK = 0, slpK = 0, sitK = 0, walkAct = null;
+  let walkK = 0, ph = 0, yawK = 0, slpK = 0, sitK = 0;
   const playClip = (nme, secs, t) => { const c = clips[nme]; if (!c) return; if (act) act.stop(); act = mixer.clipAction(c); act.reset().play(); clipUntil = t + secs; };
   g.userData.rigPlay = playClip;
   return t => {
@@ -5418,17 +5423,14 @@ function tetraRigBuild(g, s, T) {
       const sw = Math.sin(ph), idle = 1 - walkK, md = ud.mode || "", eat = md === "eat" || md === "sniff", slp = md === "sleep", wag = walkK > 0.5 || hop || md === "play";
       slpK += ((slp ? 1 : 0) - slpK) * Math.min(1, dt * 2.2); sitK += ((md === "sit" ? 1 : 0) - sitK) * Math.min(1, dt * 4);
       if (act) { act.stop(); act = null; bones.forEach((b, i) => { b.quaternion.copy(rest[i]); b.position.copy(restP[i]); }); }
-      const wc = clips.Walking;
-      if (wc && ud.walk && !slp) {   // caminata real del GLB (en el lugar)
-        if (!walkAct) { walkAct = mixer.clipAction(wc); walkAct.reset().play(); }
-        mixer.update(dt); body.rotation.set(0, yawK, 0); body.position.set(0, -1.05 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1, 1); return;
-      } else if (walkAct) { walkAct.stop(); walkAct = null; bones.forEach((b, i) => { b.quaternion.copy(rest[i]); b.position.copy(restP[i]); }); }
-      const BL = k => nm("mixamorig:" + k);
-      rot(BL("LeftUpLeg"), sw * 0.7 * walkK - sitK * 1.3, 0, 0); rot(BL("RightUpLeg"), -sw * 0.7 * walkK - sitK * 1.3, 0, 0); rot(BL("LeftLeg"), Math.max(0, -sw) * 0.5 * walkK + sitK * 1.2, 0, 0); rot(BL("RightLeg"), Math.max(0, sw) * 0.5 * walkK + sitK * 1.2, 0, 0);
-      rot(BL("LeftArm"), -sw * 0.6 * walkK + Math.sin(t * 1.4) * 0.05 * idle, 0, 0.08); rot(BL("RightArm"), sw * 0.6 * walkK - Math.sin(t * 1.4) * 0.05 * idle, 0, -0.08);
-      rot(hips, 0, 0, sw * 0.05 * walkK); rot(sp1, Math.sin(t * 1.9) * 0.02 * idle, 0, 0);
-      rot(neck, (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
-      rot(head, slp ? 0.15 : Math.sin(ph * 2) * 0.05 * walkK, 0, (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
+      const BL = k => nm("mixamorig:" + k), cL = Math.cos(ph), cR = -cL;
+      const thL = -sw * 0.55 * walkK - sitK * 1.3, thR = sw * 0.55 * walkK - sitK * 1.3, knL = Math.max(0, cL) * 0.8 * walkK + sitK * 1.2, knR = Math.max(0, cR) * 0.8 * walkK + sitK * 1.2;
+      rotW(BL("LeftUpLeg"), thL, 0, 0); rotW(BL("RightUpLeg"), thR, 0, 0); rotW(BL("LeftLeg"), knL, 0, 0); rotW(BL("RightLeg"), knR, 0, 0);
+      rotW(BL("LeftFoot"), -(thL + knL) * 0.9, 0, 0); rotW(BL("RightFoot"), -(thR + knR) * 0.9, 0, 0);
+      rotW(BL("LeftArm"), sw * 0.5 * walkK + Math.sin(t * 1.4) * 0.05 * idle, 0, 0.1); rotW(BL("RightArm"), -sw * 0.5 * walkK - Math.sin(t * 1.4) * 0.05 * idle, 0, -0.1);
+      rotW(hips, 0, 0, sw * 0.04 * walkK); rotW(sp1, Math.sin(t * 1.9) * 0.02 * idle, 0, 0);
+      rotW(neck, (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
+      rotW(head, slp ? 0.15 : Math.sin(ph * 2) * 0.05 * walkK, 0, (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
       extra.forEach((i, n) => { const b = bones[i]; E.set(0, 0, Math.sin(t * (wag ? 7 : 1.8) + n * 0.7) * (wag ? 0.16 : 0.07)); Q.setFromEuler(E); b.quaternion.copy(rest[i]).multiply(Q); });
       body.rotation.set(0, yawK, sw * 0.05 * walkK - slpK * 1.4); body.position.set(-slpK * 0.55, -1.05 + Math.abs(sw) * 0.12 * walkK + slpK * 0.5 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
       return;
@@ -11119,7 +11121,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-21 09:40";
+const BUILD_STAMP = "2026-11-21 09:45";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
