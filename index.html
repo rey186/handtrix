@@ -4634,6 +4634,17 @@ const audio = (() => {
     ok() { if (!ctx || !on) return; const t = T0(); bell(hz(79), t, .3, .13); bell(hz(84), t + .08, .5, .14); },
     levelUp() { if (!ctx || !on) return; const t = T0(); [60, 64, 67, 72, 76, 79].forEach((m, i) => { bell(hz(m + 12), t + i * .07, .7, .12, (i - 2.5) * .15); pluck(hz(m), t + i * .07, .25, .07, 0, "square"); }); hiss(t, .5, .08, 1500, 8000, .8); },
     combo(c = 1) { if (!ctx || !on) return; const k = Math.min(10, c) * 2, t = T0(); bell(hz(84 + k), t, .35, .14); bell(hz(91 + k), t + .06, .45, .12); },
+    petVoice(k) {   // vocecitas de Tetra (sintetizadas, sin archivos): festejo, susto, tristeza, ronquido, maullido, salto, ñam
+      if (!ctx || !on) return;
+      if (k === "cheer") { sfx("triangle", 700, .1, .13, 1100, 0); sfx("triangle", 920, .12, .13, 1450, .11); sfx("sine", 1500, .14, .08, 2100, .22); }
+      else if (k === "scare") { sfx("triangle", 1100, .1, .13, 1600, 0); for (let i = 0; i < 4; i++) sfx("triangle", 1300 - i * 120, .06, .09, 0, .12 + i * .06); }
+      else if (k === "sad") { sfx("sine", 640, .26, .1, 430, 0); sfx("sine", 500, .32, .09, 300, .26); }
+      else if (k === "zz") { sfx("sine", 160, .55, .07, 115, 0); sfx("sine", 140, .55, .06, 100, .9); }
+      else if (k === "mew") { sfx("triangle", 650, .14, .1, 900, 0); sfx("triangle", 880, .2, .09, 600, .15); }
+      else if (k === "hop") { sfx("sine", 420, .12, .1, 760, 0); }
+      else if (k === "nom") { [0, .14, .28].forEach(d => sfx("square", 300, .05, .05, 190, d)); }
+      else if (k === "dance") { [0, .18, .36, .54].forEach((d, i) => sfx("triangle", 660 + (i % 2) * 220, .1, .09, 0, d)); }
+    },
     power() { if (!ctx || !on) return; const t = T0(); [72, 79, 84, 91].forEach((m, i) => { bell(hz(m), t + i * .06, .5, .13, (i - 1.5) * .25); }); hiss(t, .3, .07, 1200, 7000, 1); },
     bomb() { if (!ctx || !on) return; const t = T0(); thud(t, 120, 24, .9, .7); thud(t + .02, 70, 22, 1.1, .55); hiss(t, .8, .35, 3000, 120, .5); hiss(t + .05, .5, .2, 900, 80, .6); },
     ice() { if (!ctx || !on) return; const t = T0(); hiss(t, .7, .14, 9000, 1800, 3); [96, 100, 103, 108].forEach((m, i) => bell(hz(m), t + i * .08 + .05, .8, .1, (i - 1.5) * .3)); },
@@ -5514,7 +5525,7 @@ function mountTetra() {
   h.onclick = () => tetraMenuTap(h);
 }
 let tetraGameT = 0;
-function petReact(k) { try { if (p3 && p3.root) p3.root.userData.react = { k, t: p3.t }; } catch (e) { } }
+function petReact(k) { try { if (p3 && p3.root) p3.root.userData.react = { k, t: p3.t }; audio.petVoice(k); } catch (e) { } }
 window.__petReact = petReact; window.__hm = () => ({ open: hogarOpen, ud: hmUD, nap: hmNap, go: hmGo, play: hmPlayDeco, route: hmRoute, obst: hmObst });
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
@@ -7381,7 +7392,7 @@ const hmAmb = (() => {   // música + sonidos del hogar según la hora: día ale
   };
 })();
 function hmUD() { return (p3 && p3.root && p3.root.userData) || {}; }
-function hmMode(m, ms) { const u = hmUD(); u.mode = m; clearTimeout(hmMode._t); if (m && ms) hmMode._t = setTimeout(() => { if (hmUD().mode === m) hmUD().mode = ""; }, ms); }
+function hmMode(m, ms) { const u = hmUD(); if (m && m !== u.mode) { try { const V = { dance: "dance", jump: "hop", eat: "nom", sniff: "mew", hug: "mew", sleep: "zz", spin: "cheer", play: "hop" }[m]; if (V && hmOpen()) audio.petVoice(V); } catch (e) { } } u.mode = m; clearTimeout(hmMode._t); if (m && ms) hmMode._t = setTimeout(() => { if (hmUD().mode === m) hmUD().mode = ""; }, ms); }
 let hmD = 0.3;
 function hmGo0(x, act, d, thru) {   // camina hasta (x, profundidad d 0=frente..1=fondo): patas alternadas, mira hacia donde va; al llegar se gira de frente
   const pet = $("hmPet"); if (!pet) return; if (pet._up) { const H = pet._up; pet._up = 0; try { pet.animate([{ translate: "0 -" + H + "cqw" }, { translate: "0 -" + (H + 4) + "cqw", offset: 0.3 }, { translate: "0 0" }], { duration: 560, easing: "ease-in" }); } catch (e) { } pet.style.translate = ""; pet.style.zIndex = ""; { const uu = hmUD(); uu.jmp = 1; try { uu.hop = p3.t; } catch (e) { } setTimeout(() => { uu.jmp = 0; }, 560); } } x = Math.max(18, Math.min(80, x)); d = d == null ? hmD : Math.max(0, Math.min(1, d)); const dx = Math.abs(x - hmX), dd = Math.abs(d - hmD), dur = (dx < 1.5 && dd < 0.06) ? 0 : Math.max(1, dx * 0.1, dd * 3), u = hmUD();
@@ -11176,7 +11187,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 15:03";
+const BUILD_STAMP = "2026-11-22 15:24";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
