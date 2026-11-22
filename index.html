@@ -5515,7 +5515,7 @@ function mountTetra() {
 }
 let tetraGameT = 0;
 function petReact(k) { try { if (p3 && p3.root) p3.root.userData.react = { k, t: p3.t }; } catch (e) { } }
-window.__petReact = petReact; window.__hm = () => ({ open: hogarOpen, ud: hmUD, nap: hmNap });
+window.__petReact = petReact; window.__hm = () => ({ open: hogarOpen, ud: hmUD, nap: hmNap, go: hmGo, play: hmPlayDeco, route: hmRoute, obst: hmObst });
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
   try {
@@ -7199,15 +7199,15 @@ const HM_FD = {   // objetos de piso: cada uno tiene su lugar fijo (l = izquierd
   drum: { img: "drum", l: 76, w: 8, b: .30, x: 80, d: .82, mode: "drum", ms: 4200, em: "🥁", say: ["¡Pum, pum! 🥁", "Soy baterista 🎶", "¡Ta-ca-tá! 🥁"] },
   blocks: { img: "blocks", l: 3, w: 8, b: .27, x: 8, d: .74, mode: "build", ms: 4200, em: "🧱", say: ["¡Una torre! 🧱", "Uno sobre otro… ✨", "¡Casi se cae! 😅"] },
   top: { img: "top", l: 36, w: 6.5, b: .06, x: 39, d: .25, mode: "spin", ms: 3400, em: "🪀", say: ["¡Gira, gira! 🌀", "Mareada… 😵‍💫", "¡Otra vez! 🪀"] },
-  sofa: { img: "sofa", l: 33, w: 28, b: .25, x: 47, d: .8, em: "🛋️", mode: "sit", ms: 7000, say: ["¡Qué sofá tan blandito! 🛋️", "Me quedo un ratito acá 😌", "Mejor que el piso 💜"] },
-  pouf: { img: "pouf", l: 66, w: 12, b: .20, x: 72, d: .68, em: "🟣", mode: "sit", ms: 6000, say: ["¡Peluche gigante! 🟣", "Me hundo… qué rico 😌", "Mi pufff 💜"] },
+  sofa: { img: "sofa", l: 33, w: 28, b: .25, x: 47, d: .8, up: 6, em: "🛋️", mode: "sit", ms: 7000, say: ["¡Qué sofá tan blandito! 🛋️", "Me quedo un ratito acá 😌", "Mejor que el piso 💜"] },
+  pouf: { img: "pouf", l: 66, w: 12, b: .20, x: 72, d: .68, up: 4, em: "🟣", mode: "sit", ms: 6000, say: ["¡Peluche gigante! 🟣", "Me hundo… qué rico 😌", "Mi pufff 💜"] },
   shelf: { img: "shelf", l: 61, w: 13, b: .31, x: 66, d: .92, em: "📚", mode: "look", ms: 3600, say: ["Muchos libros 📚", "Ese trofeo es mío 🏆", "¿Habrá alguno con dibujos? 👀"] },
   tent: { img: "tent", l: 50, w: 19, b: .08, x: 58, d: .22, em: "🏕️", mode: "sleep", ms: 7000, say: ["Mi casita secreta 🏕️", "Shhh, estoy escondida 🤫", "Qué cómodo acá adentro ⭐"] },
   spillow: { img: "spillow", l: 16, w: 9, b: .012, x: 20, d: .05, em: "⭐", mode: "sit", ms: 5000, say: ["Mi estrella blandita ⭐", "Qué suave… 😌"] },
   rocket: { img: "rocket", l: 26, w: 6, b: .012, x: 29, d: .05, mode: "jump", ms: 3200, em: "🚀", say: ["¡Al espacio! 🚀", "3, 2, 1… ¡despegue! 🚀", "Fiuuuum 🌟"] },
   car: { img: "car", l: 33, w: 10, b: .012, x: 38, d: .05, mode: "ride", ms: 4200, em: "🚗", say: ["¡Brum, brum! 🚗", "Piiip piiip 🚗", "Voy a toda velocidad 💨"] },
   skate: { img: "skate", l: 44, w: 12, b: .012, x: 50, d: .05, mode: "ride", ms: 4200, em: "🛹", say: ["¡Skater! 🛹", "Uy, casi me caigo 😅", "Mirá este truco ✨"] },
-  cushions: { img: "cushions", l: 57, w: 11, b: .012, x: 62, d: .05, em: "😴", mode: "sit", ms: 6000, say: ["Una montaña de almohadas 😴", "Me quedo acá un rato 💤"] },
+  cushions: { img: "cushions", l: 57, w: 11, b: .012, x: 62, d: .05, up: 3, em: "😴", mode: "sit", ms: 6000, say: ["Una montaña de almohadas 😴", "Me quedo acá un rato 💤"] },
   xylo: { img: "xylo", l: 69, w: 11, b: .012, x: 74, d: .05, mode: "drum", ms: 4200, em: "🎵", say: ["¡Do, re, mi! 🎵", "Soy música 🎶", "Tin, tin, tin 🎵"] },
   mbox: { img: "mbox", l: 81, w: 9, b: .012, x: 80, d: .05, mode: "dance", ms: 5000, em: "🎶", say: ["Ahí sale una canción 🎶", "Mi cajita de música 💜", "La gatita dorada baila 🐱"] },
   post: { img: "post", l: 91, w: 7, b: .012, x: 80, d: .05, mode: "scratch", ms: 4200, em: "🐾", say: ["¡Ras, ras! 🐾", "Me afilo las uñitas 😼", "Qué rico rascar 🐾"] }
@@ -7379,12 +7379,45 @@ const hmAmb = (() => {   // música + sonidos del hogar según la hora: día ale
 function hmUD() { return (p3 && p3.root && p3.root.userData) || {}; }
 function hmMode(m, ms) { const u = hmUD(); u.mode = m; clearTimeout(hmMode._t); if (m && ms) hmMode._t = setTimeout(() => { if (hmUD().mode === m) hmUD().mode = ""; }, ms); }
 let hmD = 0.3;
-function hmGo(x, act, d) {   // camina hasta (x, profundidad d 0=frente..1=fondo): patas alternadas, mira hacia donde va; al llegar se gira de frente
-  const pet = $("hmPet"); if (!pet) return; if (pet._up) { pet._up = 0; try { pet.animate([{ translate: "0 -15cqw" }, { translate: "0 -19cqw", offset: 0.3 }, { translate: "0 0" }], { duration: 560, easing: "ease-in" }); } catch (e) { } pet.style.translate = ""; { const uu = hmUD(); uu.jmp = 1; try { uu.hop = p3.t; } catch (e) { } setTimeout(() => { uu.jmp = 0; }, 560); } } x = Math.max(18, Math.min(80, x)); d = d == null ? hmD : Math.max(0, Math.min(1, d)); const dx = Math.abs(x - hmX), dd = Math.abs(d - hmD), dur = (dx < 1.5 && dd < 0.06) ? 0 : Math.max(1, dx * 0.1, dd * 3), u = hmUD();
+function hmGo0(x, act, d, thru) {   // camina hasta (x, profundidad d 0=frente..1=fondo): patas alternadas, mira hacia donde va; al llegar se gira de frente
+  const pet = $("hmPet"); if (!pet) return; if (pet._up) { const H = pet._up; pet._up = 0; try { pet.animate([{ translate: "0 -" + H + "cqw" }, { translate: "0 -" + (H + 4) + "cqw", offset: 0.3 }, { translate: "0 0" }], { duration: 560, easing: "ease-in" }); } catch (e) { } pet.style.translate = ""; pet.style.zIndex = ""; { const uu = hmUD(); uu.jmp = 1; try { uu.hop = p3.t; } catch (e) { } setTimeout(() => { uu.jmp = 0; }, 560); } } x = Math.max(18, Math.min(80, x)); d = d == null ? hmD : Math.max(0, Math.min(1, d)); const dx = Math.abs(x - hmX), dd = Math.abs(d - hmD), dur = (dx < 1.5 && dd < 0.06) ? 0 : Math.max(1, dx * 0.1, dd * 3), u = hmUD();
   clearTimeout(hmTmo);
   if (dur) { pet.style.transitionDuration = dur + "s"; u.walk = 1; { const sx = (x - hmX) * 0.1, dz = (hmD - d) * 3, an = Math.atan2(sx, dz), aa = Math.abs(an), sg = an < 0 ? -1 : 1; u.yaw = (dx < 1.5 && dd < 0.06) ? 0 : sg * (aa <= Math.PI / 2 ? aa * 0.73 : 1.15 + (aa - Math.PI / 2) / (Math.PI / 2) * (Math.PI - 1.15)); } u.mode = ""; }
   pet.style.left = x + "%"; pet.style.setProperty("--d", d.toFixed(3)); pet.style.setProperty("--s", (1 - d * 0.2).toFixed(2)); hmX = x; hmD = d;
-  hmTmo = setTimeout(() => { const v = hmUD(); v.walk = 0; v.yaw = 0; if (act) setTimeout(act, 350); }, dur * 1000 + 30);
+  hmTmo = setTimeout(() => { if (thru) { if (act) act(); return; } const v = hmUD(); v.walk = 0; v.yaw = 0; if (act) setTimeout(act, 350); }, dur * 1000 + 30);
+}
+// ---- espacio de los objetos: muebles grandes ocupan lugar (Tetra los rodea) y tapan a Tetra si pasa detrás
+const HM_OBST = ["shelf", "tent", "pouf", "sofa"];
+function hmObst() {
+  const sc = $("hmScene"); if (!sc) return []; const q = sc.getBoundingClientRect(), u = q.width / 100, IH = Math.max(129.5 * u, q.height), F = IH * 0.495, out = [];
+  HM_OBST.forEach(k => { if (!HM.ex[k]) return; const el = document.querySelector(".fd-" + k); if (!el) return; const r = el.getBoundingClientRect(); if (r.width < 5) return;
+    const dB = ((q.bottom - r.bottom) / u - 1) / (F / u - 17); out.push({ k, x0: (r.left - q.left) / q.width * 100, x1: (r.right - q.left) / q.width * 100, d0: dB - 0.04, d1: dB + 0.12 }); });
+  return out;
+}
+const hmSegHit = (ax, ad, bx, bd, o, pad) => { for (let i = 0; i <= 24; i++) { const t = i / 24, x = ax + (bx - ax) * t, d = ad + (bd - ad) * t; if (x > o.x0 - pad && x < o.x1 + pad && d > o.d0 - 0.04 && d < o.d1 + 0.04) return true; } return false; };
+function hmRoute(x0, d0, x1, d1) {
+  const ob = hmObst().filter(o => !(x1 > o.x0 - 1 && x1 < o.x1 + 1 && d1 > o.d0 - 0.06 && d1 < o.d1 + 0.06) && !(x0 > o.x0 - 1 && x0 < o.x1 + 1 && d0 > o.d0 - 0.06 && d0 < o.d1 + 0.06));
+  const free = (ax, ad, bx, bd) => !ob.some(o => hmSegHit(ax, ad, bx, bd, o, 1.5)), len = (ax, ad, bx, bd) => Math.hypot((bx - ax) * 0.1, (bd - ad) * 3);
+  if (!ob.length || free(x0, d0, x1, d1)) return [[x1, d1]];
+  const cand = []; ob.forEach(o => [o.x0 - 3, o.x1 + 3].forEach(cx => [o.d0 - 0.1, o.d1 + 0.1].forEach(cd => cand.push([Math.max(18, Math.min(80, cx)), Math.max(0, Math.min(1, cd))]))));
+  let best = null, bl = 1e9;
+  cand.forEach(c => { if (free(x0, d0, c[0], c[1]) && free(c[0], c[1], x1, d1)) { const l = len(x0, d0, c[0], c[1]) + len(c[0], c[1], x1, d1); if (l < bl) { bl = l; best = [c]; } } });
+  if (!best) cand.forEach(a => cand.forEach(b => { if (free(x0, d0, a[0], a[1]) && free(a[0], a[1], b[0], b[1]) && free(b[0], b[1], x1, d1)) { const l = len(x0, d0, a[0], a[1]) + len(a[0], a[1], b[0], b[1]) + len(b[0], b[1], x1, d1); if (l < bl) { bl = l; best = [a, b]; } } }));
+  return best ? best.concat([[x1, d1]]) : [[x1, d1]];
+}
+function hmGo(x, act, d) {
+  const pet = $("hmPet"); if (!pet) return; x = Math.max(18, Math.min(80, x)); d = d == null ? hmD : Math.max(0, Math.min(1, d));
+  let w = [[x, d]]; try { w = hmRoute(hmX, hmD, x, d); } catch (e) { }
+  if (w.length < 2) { hmGo0(x, act, d, false); return; }
+  const step = i => { const p = w[i], last = i === w.length - 1; hmGo0(p[0], last ? act : () => step(i + 1), p[1], !last); }; step(0);
+}
+let hmZt = null;
+function hmZloop() {
+  clearInterval(hmZt); hmZt = setInterval(() => {
+    if (!hmOpen()) return; const pet = $("hmPet"); if (!pet) return; const pr = pet.getBoundingClientRect(); if (pr.width < 5) return; const feet = pr.bottom - pr.height * 0.12, cx = (pr.left + pr.right) / 2;
+    document.querySelectorAll("#hmScene .hm-it:not(.hm-wd):not([data-tap=lamp]):not([data-tap=win]):not([data-tap=poster]):not([data-tap=lights]):not([data-tap=neon]):not([data-tap=clock]):not([data-tap=shelf]):not([data-tap=gift])").forEach(el => {
+      const r = el.getBoundingClientRect(); let f = false; if (!pet._up && r.width > 5 && cx > r.left && cx < r.right && feet < r.bottom - Math.max(10, r.height * 0.22) && feet > r.top) f = true; const z = f ? "5" : ""; if (el.style.zIndex !== z) el.style.zIndex = z; });
+  }, 160);
 }
 let hmBusy = 0, hmBx = 58;
 const hmBz = ms => { hmBusy = Date.now() + ms; };
@@ -7424,17 +7457,18 @@ function hmWater() {   // toma agua
   hmBz(5200); hmGo(hmO("water", HM_WATER), () => { hmMode("eat", 2600); try { hmAmb.sfx("pop"); } catch (e) { } hmFly("💧", $("hmWater"), 4, -34, 1500); plBubble(["Glup, glup 💧", "¡Qué fresquita! 💦", "Ahhh, qué rico 😌"][(Math.random() * 3) | 0], 2, 2600); PL.en = plClamp(PL.en + 2); plSave(); }, 0.1);
 }
 function hmCush() { hmBz(8200); hmGo(hmO("bed", HM_BED), () => { hmMode("sit", 7000); plBubble("Qué cómodo… 😌", 2, 2800); }, HM_BEDD); }
-function hmJumpUp(cb) {   // salta arriba de la cama de madera
+function hmJumpUp(cb, H) {
+  H = H || 15;   // salta arriba de la cama de madera
   const pet = $("hmPet"), u = hmUD(); if (!pet) { cb && cb(); return; } u.walk = 0; u.yaw = 0; u.mode = ""; u.jmp = 1; try { u.hop = p3.t; } catch (e) { }
-  const done = () => { pet.style.translate = "0 -15cqw"; pet._up = 1; u.jmp = 0; cb && cb(); };
-  try { const a = pet.animate([{ translate: "0 0" }, { translate: "0 -22cqw", offset: 0.45 }, { translate: "0 -15cqw" }], { duration: 800, easing: "ease-out" }); a.onfinish = done; } catch (e) { done(); }
+  const done = () => { pet.style.translate = "0 -" + H + "cqw"; pet._up = H; pet.style.zIndex = "6"; u.jmp = 0; cb && cb(); };
+  try { const a = pet.animate([{ translate: "0 0" }, { translate: "0 -" + (H + 7) + "cqw", offset: 0.45 }, { translate: "0 -" + H + "cqw" }], { duration: 800, easing: "ease-out" }); a.onfinish = done; } catch (e) { done(); }
 }
 function hmNap(ms, wood) {   // wood: duerme en la cama de madera con estrellas
   ms = ms || 12000; hmBz(ms + 2000); hmGo(wood ? hmO("bed2", 15) : hmO("bed", HM_BED), () => { const go = () => { hmMode("sleep", ms); plBubble("Zzz… 😴", 2, 2400); hmFlyPet("💤"); setTimeout(() => { if (hmOpen() && !PL.sick && plMoodKey() !== "sleep") { PL.en = plClamp(PL.en + 6); plSave(); plBubble("¡Qué siesta! ✨", 2, 2400); } }, ms); }; if (wood) hmJumpUp(go); else go(); }, Math.max(0, (wood ? 1.05 : HM_BEDD) - hmOff(wood ? "bed2" : "bed")[1] / 47));
 }
 function hmPlayDeco(k) {   // Tetra va a jugar con un juguete del piso
   const f = HM_FD[k]; if (!f || !HM.ex[k]) return; hmBz(Math.max(5200, (f.ms || 0) + 2400)); const el = document.querySelector(".fd-" + k);
-  hmGo(f.x + hmOff("fd:" + k)[0], () => { hmMode(f.mode || "play", f.ms || 3200); try { hmAmb.sfx("pop"); } catch (e) { } if (el) { el.classList.remove("bn"); void el.offsetWidth; el.classList.add("bn"); hmFly(f.em, el, 0, -50, 1600); } plBubble(f.say[(Math.random() * f.say.length) | 0], 2, 2800); PL.mood = plClamp(PL.mood + 1); plSave(); }, f.d - hmOff("fd:" + k)[1] / 47);
+  hmGo(f.x + hmOff("fd:" + k)[0], () => { const run = () => { hmMode(f.mode || "play", f.ms || 3200); try { hmAmb.sfx("pop"); } catch (e) { } if (el) { el.classList.remove("bn"); void el.offsetWidth; el.classList.add("bn"); hmFly(f.em, el, 0, -50, 1600); } plBubble(f.say[(Math.random() * f.say.length) | 0], 2, 2800); PL.mood = plClamp(PL.mood + 1); plSave(); }; if (f.up) hmJumpUp(run, f.up); else run(); }, f.d - (f.up || 0) / 47 - hmOff("fd:" + k)[1] / 47);
 }
 function hmDropToy(tm, em, t, dx, dy) {   // el juguete que sacó del baúl queda en el piso un rato
   const sc = $("hmScene"); if (!sc || !hmOpen() || !t) return; const r = t.getBoundingClientRect(), q = sc.getBoundingClientRect(), old = sc.querySelectorAll(".hm-drop"); if (old.length >= 3) old[0].remove();
@@ -7491,13 +7525,13 @@ function hmTap(kind) {   // tocar muebles: la habitación responde
   else if (kind === "bowl") { if (PL.food <= 0) { hmBz(3500); hmGo(hmO("bowl", HM_BOWL), () => plBubble("No queda comida… 🥺", 2, 2600), 0.1); } else if (PL.sat >= 98) plSay("full", 2); else plAct("feed"); }
 }
 function hogarOpen() {
-  hmBuild(); const h = $("hogar"); h.hidden = false; document.body.classList.add("inhome"); try { audio.menuStop(); } catch (e) { } try { hmAmb.start(); } catch (e) { } hmApply(); plCatchUp(); hmPanel();
+  hmBuild(); const h = $("hogar"); h.hidden = false; document.body.classList.add("inhome"); try { audio.menuStop(); } catch (e) { } try { hmAmb.start(); } catch (e) { } hmApply(); plCatchUp(); hmPanel(); hmZloop();
   const pet = $("hmPet"), s = hmSize(); pet.style.width = s + "px"; pet.style.height = s + "px"; pet.style.transitionDuration = "0s"; const _sl = plMoodKey() === "sleep" || PL.sick; hmX = _sl ? HM_BED : 50; hmD = _sl ? HM_BEDD : 0.3; hmBusy = 0; pet.style.left = hmX + "%"; pet.style.setProperty("--d", String(hmD)); pet.style.setProperty("--s", (1 - hmD * 0.2).toFixed(2));
   setTimeout(() => { try { if (p3mount($("hmPetC"), "tetra", s)) { p3.root.scale.setScalar(0.9); p3.root.position.y = 0.0; Object.assign(p3.root.userData, { calm: true, walk: 0, yaw: 0, mode: "" }); } plApply(); hmThink(); } catch (e) { console.warn(e); } }, 60);
   clearInterval(hmT); hmT = setInterval(() => { try { hmThink(); hmPanel(); hmApply(); } catch (e) { } }, 5500);
   setTimeout(() => { try { if (plGiftAvail() && plMoodKey() !== "sleep") { hmGo(46, () => { plBubble("¡Encontré algo para vos! 🎁", 3, 3800); hmMode("play", 3500); }, 0.15); } else { const k = plMoodKey(); plSay(k === "sleep" ? "sleepy" : PL.sat < 25 ? "hungry" : "greet0", 2, 3000); } } catch (e) { } }, 900);
 }
-function hogarClose() { const h = $("hogar"); if (h) h.hidden = true; document.body.classList.remove("inhome"); clearInterval(hmT); clearTimeout(hmTmo); try { hmAmb.stop(); } catch (e) { } try { menuMusicSync(); } catch (e) { } try { plUI(); } catch (e) { } }
+function hogarClose() { const h = $("hogar"); if (h) h.hidden = true; document.body.classList.remove("inhome"); clearInterval(hmT); clearInterval(hmZt); clearTimeout(hmTmo); try { hmAmb.stop(); } catch (e) { } try { menuMusicSync(); } catch (e) { } try { plUI(); } catch (e) { } }
 let hmTab = "m";
 const HM_TH = { plant: "plant", lamp: "lamp", poster: "frame", teddy: "bear", duck: "duck", drum: "drum", blocks: "blocks", top: "top" };
 ["sofa", "pouf", "shelf", "tent", "pic1", "pic2", "mirror", "wshelf", "clock", "bunting", "rocket", "spillow", "skate", "xylo", "post", "car", "cushions", "mbox"].forEach(k => HM_TH[k] = k);
@@ -11138,7 +11172,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 09:59";
+const BUILD_STAMP = "2026-11-22 10:06";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
