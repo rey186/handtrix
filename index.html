@@ -2875,6 +2875,11 @@ html body.nocam .top { padding-right:6px !important; box-sizing:border-box; }
 html body.nocam .pieces > div:last-child { margin-right:2px; }
 html body .tgame { width:112px !important; height:112px !important; }
 html body #hmPet.hmz .tip { bottom: 48% !important; }
+/* Fix: botón Google sin recuadro blanco; botones de Temporada sin desborde */
+#acctGBtn,#lgGBtn,#acctGBtn iframe,#lgGBtn iframe{color-scheme:light;background:transparent!important}
+#acctGBtn{max-width:100%;overflow:hidden;border-radius:999px}
+#pgSeason .sn-card .sn-btn{box-sizing:border-box!important;max-width:100%!important;padding:8px 8px!important;font-size:11px!important;letter-spacing:0!important;white-space:nowrap!important;overflow:hidden;text-overflow:clip}
+#pgSeason .sn-card.pass .sn-btn{width:auto}
 /* Pantalla de partida (rediseño) */
 /* Diálogos */
 .chest-box,.lg-box,.dm-box,.ww-box,.control-choice,#chModal>div,#passModal>div,#calib{border:3px solid #f5b800!important;border-radius:20px!important;background:linear-gradient(180deg,rgba(60,24,150,.96),rgba(30,8,86,.98))!important;box-shadow:0 0 24px rgba(245,184,0,.3),0 4px 0 #1a0850!important;clip-path:none!important}
@@ -11187,7 +11192,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 15:24";
+const BUILD_STAMP = "2026-11-22 15:50";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
