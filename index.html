@@ -2873,7 +2873,7 @@ background:radial-gradient(circle,#fff 0,#fff 18%,var(--c) 48%,transparent 72%);
 html body.nocam .pieces > div::before { left:9px !important; top:6px !important; font-size:7px !important; letter-spacing:.06em !important; }
 html body.nocam .top { padding-right:6px !important; box-sizing:border-box; }
 html body.nocam .pieces > div:last-child { margin-right:2px; }
-html body .tgame { width:176px !important; height:176px !important; }
+html body .tgame { width:112px !important; height:112px !important; }
 html body #hmPet.hmz .tip { bottom: 48% !important; }
 /* Pantalla de partida (rediseño) */
 /* Diálogos */
@@ -5519,12 +5519,16 @@ window.__petReact = petReact; window.__hm = () => ({ open: hogarOpen, ud: hmUD, 
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
   try {
-    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 176)) { h.hidden = true; return; } p3.root.scale.setScalar(0.95); p3.root.position.y = -0.2; }
+    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 112)) { h.hidden = true; return; } p3.root.scale.setScalar(0.9); p3.root.position.y = -0.2; }
     h.style.pointerEvents = "none";   // la mascota no intercepta toques de los controles
     if (hop && p3 && p3.root) p3.root.userData.hop = p3.t;
     if (msg) { let tp = h.querySelector(".tip"); if (!tp) { tp = document.createElement("div"); tp.className = "tip"; h.appendChild(tp); } tp.textContent = msg; tipSide(h, tp); clearTimeout(h._t); h._t = setTimeout(() => tp.remove(), 2400); }
   } catch (e) { h.hidden = true; }
 }
+// al volver al menú, la mascota de la partida desaparece (y vuelve la del menú)
+try { const _mn = $("menu"); if (_mn) new MutationObserver(() => { if (_mn.hidden) return; const g = $("tetraGame"); if (g && !g.hidden) { g.hidden = true; try { const th = $("tetraHost"); if (!p3 || p3.cv.parentNode !== th) { g.innerHTML = ""; mountTetra(); } else g.innerHTML = ""; } catch (e) { } } }).observe(_mn, { attributes: true, attributeFilter: ["hidden", "class", "style"] }); } catch (e) { }
+// guardia: si el menú, el hogar u otra pantalla está visible, la mascota de la partida no puede quedar flotando
+setInterval(() => { try { const g = $("tetraGame"); if (!g || g.hidden) return; const mn = $("menu"), hg = $("hogar"); if ((mn && !mn.hidden) || (hg && !hg.hidden) || document.body.classList.contains("inhome")) { const had = p3 && p3.cv && p3.cv.parentNode === g; g.hidden = true; g.innerHTML = ""; if (had) { const th = $("tetraHost"); if (th && th.offsetParent !== null) mountTetra(); } } } catch (e) { } }, 500);
 // Mascota de la partida movible: arrastrar la mueve (se recuerda la posicion); doble toque la devuelve a su lugar; un toque la hace saltar
 try { const PG = "handtrix-petpos-game-v1", pg = $("tetraGame"); let lastTap = 0;
   makeTetraDraggable(pg, PG, () => { const n = Date.now();
@@ -11172,7 +11176,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 10:14";
+const BUILD_STAMP = "2026-11-22 15:03";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
