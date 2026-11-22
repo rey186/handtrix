@@ -5419,7 +5419,7 @@ function tetraRigBuild(g, s, T) {
     const dt = lastT == null ? 0 : Math.min(0.1, t - lastT); lastT = t;
     const ud = g.userData || {}, hop = ud.hop != null && t - ud.hop < 1.4;
     if (ud.calm) {   // HOGAR: camina de verdad, come, duerme, se sienta
-      walkK += ((ud.walk ? 1 : 0) - walkK) * Math.min(1, dt * 8); ph += dt * 8 * walkK; yawK += ((ud.yaw || 0) - yawK) * Math.min(1, dt * 5);
+      walkK += ((ud.walk ? 1 : 0) - walkK) * Math.min(1, dt * 8); ph += dt * 8 * walkK; yawK += (((ud.mode === "sleep") ? 0.2 : (ud.yaw || 0)) - yawK) * Math.min(1, dt * 5);
       const sw = Math.sin(ph), idle = 1 - walkK, md = ud.mode || "", eat = md === "eat" || md === "sniff", slp = md === "sleep", wag = walkK > 0.5 || hop || md === "play";
       slpK += ((slp ? 1 : 0) - slpK) * Math.min(1, dt * 2.2); sitK += ((md === "sit" ? 1 : 0) - sitK) * Math.min(1, dt * 4);
       if (act) { act.stop(); act = null; bones.forEach((b, i) => { b.quaternion.copy(rest[i]); b.position.copy(restP[i]); }); }
@@ -5428,11 +5428,11 @@ function tetraRigBuild(g, s, T) {
       rotW(BL("LeftUpLeg"), thL, 0, 0); rotW(BL("RightUpLeg"), thR, 0, 0); rotW(BL("LeftLeg"), knL, 0, 0); rotW(BL("RightLeg"), knR, 0, 0);
       rotW(BL("LeftFoot"), -(thL + knL) * 0.9, 0, 0); rotW(BL("RightFoot"), -(thR + knR) * 0.9, 0, 0);
       rotW(BL("LeftArm"), sw * 0.5 * walkK + Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.0, 0, 0.1); rotW(BL("RightArm"), -sw * 0.5 * walkK - Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.0, 0, -0.1);
-      rotW(hips, 0, 0, sw * 0.04 * walkK); rotW(sp1, Math.sin(t * 1.9) * 0.02 * idle + slpK * (0.45 + Math.sin(t * 1.4) * 0.03), 0, 0);
-      rotW(neck, slpK * 0.5 + (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
-      rotW(head, slp ? 0.3 : Math.sin(ph * 2) * 0.05 * walkK, 0, (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
+      rotW(hips, 0, 0, sw * 0.04 * walkK); rotW(sp1, Math.sin(t * 1.9) * 0.02 * idle + slpK * (0.25 + Math.sin(t * 1.4) * 0.03), 0, 0);
+      rotW(neck, slpK * 0.3 + (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
+      rotW(head, slp ? 0.2 : Math.sin(ph * 2) * 0.05 * walkK, 0, (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
       extra.forEach((i, n) => { const b = bones[i]; E.set(0, 0, Math.sin(t * (wag ? 7 : 1.8) + n * 0.7) * (wag ? 0.16 : 0.07)); Q.setFromEuler(E); b.quaternion.copy(rest[i]).multiply(Q); });
-      body.rotation.set(slpK * 0.2, yawK, sw * 0.05 * walkK); body.position.set(0, -1.4 + Math.abs(sw) * 0.12 * walkK - slpK * 0.3 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
+      body.rotation.set(slpK * 0.08, yawK, sw * 0.05 * walkK); body.position.set(0, -1.4 + Math.abs(sw) * 0.12 * walkK - slpK * 0.3 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
       return;
     }
     let y = Math.max(0, Math.sin(t * 2.2)) * 0.1 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.5 : 0), ry = Math.sin(t * 0.8) * 0.4, rx = 0, rz = 0, sy = 1, mode = "idle";
@@ -11121,7 +11121,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 09:33";
+const BUILD_STAMP = "2026-11-22 09:42";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
