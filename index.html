@@ -7415,7 +7415,7 @@ let hmZt = null;
 function hmZloop() {
   clearInterval(hmZt); hmZt = setInterval(() => {
     if (!hmOpen()) return; const pet = $("hmPet"); if (!pet) return; const pr = pet.getBoundingClientRect(); if (pr.width < 5) return; const feet = pr.bottom - pr.height * 0.12, cx = (pr.left + pr.right) / 2;
-    document.querySelectorAll("#hmScene .hm-it:not(.hm-wd):not([data-tap=lamp]):not([data-tap=win]):not([data-tap=poster]):not([data-tap=lights]):not([data-tap=neon]):not([data-tap=clock]):not([data-tap=shelf]):not([data-tap=gift])").forEach(el => {
+    document.querySelectorAll("#hmScene .hm-it:not(.hm-wd):not([data-tap=lamp]):not([data-tap=win]):not([data-tap=poster]):not([data-tap=lights]):not([data-tap=neon]):not([data-tap=clock]):not([data-tap=shelf]):not([data-tap=gift]):not([data-tap=bed]):not([data-tap=bed2]):not([data-tap=cush]):not([data-tap=bowl]):not([data-tap=water]):not([data-tap=ball])").forEach(el => {
       const r = el.getBoundingClientRect(); let f = false; if (!pet._up && r.width > 5 && cx > r.left && cx < r.right && feet < r.bottom - Math.max(10, r.height * 0.22) && feet > r.top) f = true; const z = f ? "5" : ""; if (el.style.zIndex !== z) el.style.zIndex = z; });
   }, 160);
 }
@@ -11172,7 +11172,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 10:06";
+const BUILD_STAMP = "2026-11-22 10:14";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
