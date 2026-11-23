@@ -5384,7 +5384,7 @@ async function tetraGlbLoad() {
 }
 setTimeout(tetraGlbLoad, 1800);
 
-let TETRA_RIG = null, TETRA_RIGJ = null;
+let TETRA_RIG = null, TETRA_RIGJ = null, TETRA_RIGC = null;
 async function rigParse(url) {
   try {
     const T = THREE, buf = await (await fetch(url)).arrayBuffer(), dv = new DataView(buf);
@@ -5405,15 +5405,17 @@ async function tetraRigLoad() {
   try { plRemount(); } catch (e) { }
   if (!TETRA_RIGJ) TETRA_RIGJ = await rigParse("./tetra_joven.glb");
   try { plRemount(); } catch (e) { }
+  if (!TETRA_RIGC) TETRA_RIGC = await rigParse("./tetra_cachorro.glb");
+  try { plRemount(); } catch (e) { }
 }
 setTimeout(tetraRigLoad, 1500);
 function tetraRigBuild(g, s, T) {
-  const d = (s.rigKey === "j" && TETRA_RIGJ) ? TETRA_RIGJ : TETRA_RIG, mat = new T.MeshStandardMaterial({ map: d.map, normalMap: d.nmap, roughness: 0.6, metalness: 0, emissive: 0xffffff, emissiveMap: d.map, emissiveIntensity: 0.42 }); mat.normalScale.set(0.6, 0.6); s.mats.push(mat);
+  const d = (s.rigKey === "j" && TETRA_RIGJ) ? TETRA_RIGJ : (s.rigKey === "c" && TETRA_RIGC) ? TETRA_RIGC : TETRA_RIG, mat = new T.MeshStandardMaterial({ map: d.map, normalMap: d.nmap, roughness: 0.6, metalness: 0, emissive: 0xffffff, emissiveMap: d.map, emissiveIntensity: 0.42 }); mat.normalScale.set(0.6, 0.6); s.mats.push(mat);
   const bones = d.nodes.map((n, i) => { const b = new T.Bone(); b.name = "n" + i; if (n.translation) b.position.fromArray(n.translation); if (n.rotation) b.quaternion.fromArray(n.rotation); if (n.scale) b.scale.fromArray(n.scale); return b; });
   d.nodes.forEach((n, i) => (n.children || []).forEach(c => bones[i].add(bones[c])));
   const jb = d.joints.map(i => bones[i]), skel = new T.Skeleton(jb, Array.from({ length: jb.length }, (_, k) => new T.Matrix4().fromArray(d.ibm, k * 16)));
   const mesh = new T.SkinnedMesh(d.geo.clone(), mat); mesh.frustumCulled = false; mesh.add(bones[d.root]); mesh.bind(skel, new T.Matrix4());
-  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
+  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE * (d === TETRA_RIGC ? 0.75 : 1)); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
   const byName = {}; d.nodes.forEach((n, i) => { byName[n.name] = bones[i]; }); const rest = bones.map(b => b.quaternion.clone()), restP = bones.map(b => b.position.clone());
   const nm = n => byName[n], head = nm("mixamorig:Head"), neck = nm("mixamorig:Neck"), sp1 = nm("mixamorig:Spine1"), hips = nm("mixamorig:Hips");
   const extra = d.nodes.map((n, i) => /^Bone_/.test(n.name || "") && d.joints.includes(i) ? i : -1).filter(i => i >= 0);
@@ -8274,7 +8276,7 @@ function p3build(id) {
   };
   const poly = (pts, depth, mat, bevel) => { const sh = new T.Shape(); pts.forEach(([x, y], k) => k ? sh.lineTo(x, y) : sh.moveTo(x, y)); sh.lineTo(pts[0][0], pts[0][1]); const geo = new T.ExtrudeGeometry(sh, { depth, bevelEnabled: !!bevel, bevelSize: 0.06, bevelThickness: 0.06, bevelSegments: 1 }); geo.translate(0, 0, -depth / 2); return new T.Mesh(geo, mat); };
   let upd = () => { }, vxUpd = null;
-  if (id === "tetra" && s.useGlb && (TETRA_RIG || TETRA_GLB || TETRA_RIGJ)) { try { vxUpd = (TETRA_RIG || (s.rigKey === "j" && TETRA_RIGJ)) ? tetraRigBuild(g, s, T) : tetraGlbBuild(g, s, T); g.userData.voxel = true; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("glb", e); } }
+  if (id === "tetra" && s.useGlb && (TETRA_RIG || TETRA_GLB || TETRA_RIGJ || TETRA_RIGC)) { try { vxUpd = (TETRA_RIG || (s.rigKey === "j" && TETRA_RIGJ) || (s.rigKey === "c" && TETRA_RIGC)) ? tetraRigBuild(g, s, T) : tetraGlbBuild(g, s, T); g.userData.voxel = true; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("glb", e); } }
   if (!vxUpd && (id === "tetra" || id === "pinki")) { try { vxUpd = voxelPet(id, g, s, T); g.userData.voxel = !!vxUpd; } catch (e) { vxUpd = null; try { while (g.children.length) g.remove(g.children[0]); } catch (e2) { } console.warn("voxel", e); } }
   if (vxUpd) { upd = vxUpd; } else if (id === "coins") {   // bolsa de terciopelo violeta con ribetes de oro, soga con gemas y monedas con rombo
     const gold = M(0xffc22e, 0.5, { metalness: 0.95, roughness: 0.22 }), gold2 = M(0xfff0a0, 0.75, { metalness: 0.9, roughness: 0.2 }), vel = M(0x6b1466, 0.3, { roughness: 0.85, metalness: 0.05, flatShading: false }), vel2 = M(0x8c1f80, 0.35, { roughness: 0.85, metalness: 0.05, flatShading: false, side: T.DoubleSide });
@@ -8493,7 +8495,7 @@ function p3finish(s, id) {   // sombra de contacto, respiración y parpadeo (sol
 function p3mount(host, id, size) {
   const s = p3init(); if (!s) return false;
   try {
-    s.useGlb = !!((TETRA_RIG || TETRA_GLB || TETRA_RIGJ) && id === "tetra" && activePet() !== "pinki" && (tetraStage().id === 2 || (tetraStage().id === 1 && !!TETRA_RIGJ) || (tetraPreviewGlb && host.id === "petHost"))); s.rigKey = (tetraStage().id === 1 && !tetraPreviewGlb) ? "j" : "g"; p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
+    s.useGlb = !!((TETRA_RIG || TETRA_GLB || TETRA_RIGJ || TETRA_RIGC) && id === "tetra" && activePet() !== "pinki" && (tetraStage().id === 2 || (tetraStage().id === 0 && !!TETRA_RIGC) || (tetraStage().id === 1 && !!TETRA_RIGJ) || (tetraPreviewGlb && host.id === "petHost"))); s.rigKey = (tetraStage().id === 1 && !tetraPreviewGlb) ? "j" : (tetraStage().id === 0 && !tetraPreviewGlb) ? "c" : "g"; p3clear(); const m = p3build(id === "gold" ? "special" : (id === "tetra" && PET_HOSTS && PET_HOSTS.includes(host.id) && activePet() === "pinki") ? "pinki" : id); s.root = m.g; s.upd = m.upd; m.g.scale.setScalar(1.12); s.sc.add(m.g); s.t = 0;
     host.innerHTML = ""; host.appendChild(s.cv); const px = size || 150;
     if (s.size !== px) { s.r.setPixelRatio(Math.min(devicePixelRatio || 1, p3PixelRatio())); s.r.setSize(px, px, false); s.size = px; }
     p3finish(s, id); s.upd(0); s.r.render(s.sc, s.cam); if (!p3raf) { s.last = performance.now(); p3raf = requestAnimationFrame(p3loop); }
@@ -11196,7 +11198,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-22 16:05";
+const BUILD_STAMP = "2026-11-23 00:40";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
