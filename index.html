@@ -5418,7 +5418,7 @@ function tetraRigBuild(g, s, T) {
   d.nodes.forEach((n, i) => (n.children || []).forEach(c => bones[i].add(bones[c])));
   const jb = d.joints.map(i => bones[i]), skel = new T.Skeleton(jb, Array.from({ length: jb.length }, (_, k) => new T.Matrix4().fromArray(d.ibm, k * 16)));
   const mesh = new T.SkinnedMesh(d.geo.clone(), mat); mesh.frustumCulled = false; mesh.add(bones[d.root]); mesh.bind(skel, new T.Matrix4());
-  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE * (d === TETRA_RIGC ? 0.8 : d === TETRA_RIGJ ? 1.2 : 1)); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
+  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE * (d === TETRA_RIGC ? 0.7 : d === TETRA_RIGJ ? 1.22 : d === TETRA_RIGL ? 1.13 : 1)); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
   const byName = {}; d.nodes.forEach((n, i) => { byName[n.name] = bones[i]; }); const rest = bones.map(b => b.quaternion.clone()), restP = bones.map(b => b.position.clone());
   const nm = n => byName[n], head = nm("mixamorig:Head"), neck = nm("mixamorig:Neck"), sp1 = nm("mixamorig:Spine1"), hips = nm("mixamorig:Hips");
   const extra = d.nodes.map((n, i) => /^Bone_/.test(n.name || "") && d.joints.includes(i) ? i : -1).filter(i => i >= 0);
@@ -5540,7 +5540,7 @@ window.__petReact = petReact; window.__hm = () => ({ open: hogarOpen, ud: hmUD, 
 function tetraGameSay(msg, hop) {
   const h = $("tetraGame"); if (!h) return;
   try {
-    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 112)) { h.hidden = true; return; } p3.root.scale.setScalar(0.9); p3.root.position.y = -0.2; }
+    if (!h.querySelector("canvas") || !p3 || !p3.root || p3.cv.parentNode !== h) { h.hidden = false; if (!p3mount(h, "tetra", 112)) { h.hidden = true; return; } p3.root.scale.setScalar(tetraStage().id === 3 ? 0.8 : 0.9); p3.root.position.y = tetraStage().id === 3 ? -0.3 : -0.2; }
     h.style.pointerEvents = "none";   // la mascota no intercepta toques de los controles
     if (hop && p3 && p3.root) p3.root.userData.hop = p3.t;
     if (msg) { let tp = h.querySelector(".tip"); if (!tp) { tp = document.createElement("div"); tp.className = "tip"; h.appendChild(tp); } tp.textContent = msg; tipSide(h, tp); clearTimeout(h._t); h._t = setTimeout(() => tp.remove(), 2400); }
@@ -11203,7 +11203,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-25 17:55";
+const BUILD_STAMP = "2026-11-25 18:15";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
