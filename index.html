@@ -7316,7 +7316,7 @@ function hmApply() {
 }
 function hmPanel() { if (!hmOpen()) return; const p = $("hmPanel"); plUIfull(p); p.insertAdjacentHTML("beforeend", '<button type="button" class="hm-deco" data-hm="deco">🛋️ DECORAR EL HOGAR · comodidad ' + hmComfort() + '</button>'); }
 const hmOpen = () => { const h = $("hogar"); return !!(h && !h.hidden); };
-function hmSize() { const sc = $("hmScene"); return Math.max(92, Math.min(130, Math.round((sc ? sc.clientWidth : 360) * 0.30))); }
+function hmSize() { const sc = $("hmScene"); const b = Math.max(92, Math.min(130, Math.round((sc ? sc.clientWidth : 360) * 0.30))); let m = 1; try { if (activePet() === "tetra" || !activePet) m = [1, 1, 1, 1.22][tetraStage().id] || 1; } catch (e) { } return Math.round(b * m); }
 const HM_BOWL = 72, HM_BED = 24, HM_BEDD = 0.58, HM_WATER = 62;
 const plDay = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
 function plGiftAvail() { const t = plDay(); if (!PL.gift || PL.gift.d !== t) { PL.gift = { d: t, got: false }; plSave(); } return !PL.gift.got && !PL.sick; }
@@ -11203,7 +11203,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-25 18:15";
+const BUILD_STAMP = "2026-11-25 20:20";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
