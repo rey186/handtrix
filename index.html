@@ -5461,7 +5461,7 @@ function tetraRigBuild(g, s, T) {
     const dt = lastT == null ? 0 : Math.min(0.1, t - lastT); lastT = t;
     const ud = g.userData || {}, hop = ud.hop != null && t - ud.hop < 1.4;
     if (ud.calm) {   // HOGAR: camina de verdad, come, duerme, se sienta
-      walkK += ((ud.walk ? 1 : 0) - walkK) * Math.min(1, dt * 8); ph += dt * 8 * walkK * [1, 1, 0.5, 0.36][tetraStage().id]; yawK += (((ud.mode === "sleep") ? 0.2 : (ud.yaw || 0)) - yawK) * Math.min(1, dt * 5); spinA = ud.mode === "spin" ? spinA + dt * 10 : 0;
+      walkK += ((ud.walk ? 1 : 0) - walkK) * Math.min(1, dt * 8); ph += dt * 8 * walkK * [1, 1, 0.42, 0.27][tetraStage().id]; yawK += (((ud.mode === "sleep") ? 0.2 : (ud.yaw || 0)) - yawK) * Math.min(1, dt * 5); spinA = ud.mode === "spin" ? spinA + dt * 10 : 0;
       const sw = Math.sin(ph), idle = 1 - walkK, md = ud.mode || "", eat = md === "eat" || md === "sniff", slp = md === "sleep", wag = walkK > 0.5 || hop || md === "play";
       slpK += ((slp ? 1 : 0) - slpK) * Math.min(1, dt * 2.2); sitK += ((md === "sit" ? 1 : 0) - sitK) * Math.min(1, dt * 4);
       if (act) { act.stop(); act = null; bones.forEach((b, i) => { b.quaternion.copy(rest[i]); b.position.copy(restP[i]); }); }
@@ -11224,7 +11224,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-26 08:56";
+const BUILD_STAMP = "2026-11-26 08:59";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
