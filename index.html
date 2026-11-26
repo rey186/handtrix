@@ -1,12 +1,9 @@
-<!doctype html>
+<!doctypeype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#100a2a">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="HANDTRIX — Arcade Neon: bloques, gestos y combates. Jugá con las manos, enfrentá jefes y superá tus récords.">
 <title>HANDTRIX — Arcade Neon</title>
 <style>
@@ -5429,6 +5426,29 @@ function tetraRigBuild(g, s, T) {
   const pwq = new Array(d.nodes.length), qI = new T.Quaternion(), pwOf = i => { if (pwq[i]) return pwq[i]; const pi = par[i]; pwq[i] = pi < 0 ? qI.clone() : pwOf(pi).clone().multiply(rest[pi]); return pwq[i]; };
   const Qa = new T.Quaternion(), Qb = new T.Quaternion();
   const rotW = (b, x, y, z) => { if (!b) return; const i = bi.get(b), P = pwOf(i); E.set(x, y, z); Qa.setFromEuler(E); Qb.copy(P).invert().multiply(Qa).multiply(P); b.quaternion.copy(Qb).multiply(rest[i]); };
+  // ---- párpados + orejas + cola (naturalidad) ----
+  const EYE = { g: [.095, 1.405, .225, .062, .052, .04, 0xa9cdf1], c: [.2, 1.12, .40, .1, .095, .07, 0x8ccbea], j: [.12, .775, .19, .09, .075, .06, 0x10bff9], l: [.09, 1.45, .135, .046, .046, .03, 0xa9c8ea] }[s.rigKey || "g"];
+  const headNode = d.nodes.findIndex(n => n.name === "mixamorig:Head"), hk = d.joints.indexOf(headNode), lids = [];
+  if (EYE && hk >= 0 && head) {
+    const ibm = new T.Matrix4().fromArray(d.ibm, hk * 16), lm = new T.MeshStandardMaterial({ color: EYE[6], emissive: EYE[6], emissiveIntensity: 0.4, roughness: 0.85, metalness: 0 }); s.mats.push(lm);
+    [-1, 1].forEach(sx => { const m = new T.Mesh(new T.SphereGeometry(1, 16, 12), lm); m.matrixAutoUpdate = false; m.visible = false; m.frustumCulled = false; head.add(m); lids.push({ m, sx }); });
+    lids.ibm = ibm;
+  }
+  const tM = new T.Matrix4(), sM = new T.Matrix4(), pM = new T.Matrix4();
+  let nextBlink = 1.2, blinkAt = -1, dblk = false, lidK = 0;
+  const setLids = (t, tgt) => {
+    if (!lids.length) return;
+    if (blinkAt < 0 && t > nextBlink) { blinkAt = t; dblk = Math.random() < 0.2; }
+    let k = 0; if (blinkAt >= 0) { const u = (t - blinkAt) / 0.17; if (u >= 1) { blinkAt = -1; nextBlink = t + (dblk ? 0.15 : 2 + Math.random() * 3.5); dblk = false; } else k = Math.sin(u * Math.PI); }
+    k = Math.max(k, tgt, window.__lidForce || 0); lidK = k;
+    lids.forEach(L => { if (k < 0.03) { L.m.visible = false; return; } L.m.visible = true; const hh = EYE[4] * k; pM.makeTranslation(L.sx * EYE[0], EYE[1] + EYE[4] - hh, EYE[2] - EYE[5] * 0.45); sM.makeScale(EYE[3] * 1.06, Math.max(0.001, hh * 1.06), EYE[5]); L.m.matrix.copy(lids.ibm).multiply(pM).multiply(sM); L.m.matrixWorldNeedsUpdate = true; });
+  };
+  const earB = [], tailB = [];
+  extra.forEach(i => { const nme = d.nodes[i].name || ""; if (/ear/i.test(nme)) { const k = d.joints.indexOf(i), x = new T.Matrix4().fromArray(d.ibm, k * 16).invert().elements[12]; earB.push({ b: bones[i], sx: x >= 0 ? 1 : -1 }); } else { let dp = 0, q = par[i]; while (q >= 0 && /^Bone_/.test(d.nodes[q].name || "") && !/ear/i.test(d.nodes[q].name || "")) { dp++; q = par[q]; } tailB.push({ b: bones[i], dp }); } });
+  const limbs = (t, wag, sc, sad, slp) => {
+    earB.forEach((o, n) => { const pulse = Math.pow(Math.max(0, Math.sin(t * 1.1 + n * 2.3)), 30); const a = -o.sx * (sad * 0.5 + slp * 0.35 - pulse * 0.3 - sc * 0.15) + Math.sin(t * 1.7 + n * 1.9) * 0.05 + wag * Math.sin(t * 7 + n * 2) * 0.12 + sc * Math.sin(t * 45 + n) * 0.06; rotW(o.b, pulse * 0.12, 0, a); });
+    tailB.forEach(o => { const f = t * (wag ? 8 : 1.5 + sc * 14) - o.dp * 0.75, amp = (0.1 + wag * 0.3 + sc * 0.12 - slp * 0.06) * (1 + o.dp * 0.25); rotW(o.b, -sad * 0.12 + Math.sin(f * 0.5 + 1) * 0.04, Math.sin(f) * amp, 0); });
+  };
   // clips (en el lugar: sin traslación de la cadera)
   const mixer = new T.AnimationMixer(mesh), clips = {};
   d.anims.forEach(a => { const tr = []; a.ch.forEach(c => { if (c.path === "translation" && c.node === d.joints[0]) return; const nmn = "n" + c.node + "." + (c.path === "rotation" ? "quaternion" : c.path === "translation" ? "position" : "scale"); tr.push(new (c.path === "rotation" ? T.QuaternionKeyframeTrack : T.VectorKeyframeTrack)(nmn, Array.from(c.t), Array.from(c.v))); }); clips[a.name] = new T.AnimationClip(a.name, -1, tr); });
@@ -5464,7 +5484,7 @@ function tetraRigBuild(g, s, T) {
       rotW(hips, 0, 0, sw * 0.04 * walkK + rollZ); rotW(sp1, spB + Math.sin(t * 1.9) * 0.02 * idle + slpK * (0.25 + Math.sin(t * 1.4) * 0.03), 0, 0);
       rotW(neck, slpK * 0.3 + (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
       rotW(head, hdX + (slp ? 0.2 : Math.sin(ph * 2) * 0.05 * walkK), 0, hdZ + (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
-      extra.forEach((i, n) => { const b = bones[i]; E.set(0, 0, Math.sin(t * (wag ? 7 : 1.8) + n * 0.7) * (wag ? 0.16 : 0.07)); Q.setFromEuler(E); b.quaternion.copy(rest[i]).multiply(Q); });
+      limbs(t, wag ? 1 : 0, 0, 0, slpK); setLids(t, slpK);
       body.rotation.set(slpK * 0.08, yawK + spinA, sw * 0.05 * walkK + rollZ * 0.6); body.position.set(slideX, -1.4 + bobY + Math.abs(sw) * 0.12 * walkK - slpK * 0.3 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
       return;
     }
@@ -5478,7 +5498,7 @@ function tetraRigBuild(g, s, T) {
       const ch = mode === "cheer" ? Math.sin(Math.min(1, (t - rc.t) / 1.6) * Math.PI) : 0, AX = [0, 0, 1];
       rot(nm("mixamorig:LeftArm"), AX[0] * ch * 1.6, AX[1] * ch * 1.6, AX[2] * ch * 1.6); rot(nm("mixamorig:RightArm"), -AX[0] * ch * 1.6, -AX[1] * ch * 1.6, -AX[2] * ch * 1.6);
       rot(hips, 0, 0, Math.sin(t * 1.9) * 0.015); rot(sp1, Math.sin(t * 1.9) * 0.02 + e * 0.25, 0, 0); rot(neck, Math.sin(t * 1.3) * 0.03 + e * 0.25, Math.sin(t * 0.9) * 0.08, 0); rot(head, Math.sin(t * 1.1 + 1) * 0.04 + e * 0.2, 0, Math.sin(t * 0.7) * 0.05);
-      extra.forEach((i, n) => { const b = bones[i]; E.set(0, 0, Math.sin(t * (1.6 + sc * 14) + n * 0.7) * (0.07 + sc * 0.05)); Q.setFromEuler(E); b.quaternion.copy(rest[i]).multiply(Q); }); }
+      limbs(t, mode === "cheer" ? 1 : 0, sc, mode === "sad" ? Math.min(1, e * 1.6) : 0, 0); setLids(t, mode === "sad" ? 0.4 * Math.min(1, e * 1.6) : 0); }
     body.position.y = y; body.rotation.set(rx, ry, rz); body.scale.set(1, sy * (1 + Math.sin(t * 1.9) * 0.01), 1);
   };
 }
@@ -11203,7 +11223,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-25 20:50";
+const BUILD_STAMP = "2026-11-25 22:24";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
