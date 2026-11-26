@@ -5466,7 +5466,7 @@ function tetraRigBuild(g, s, T) {
       slpK += ((slp ? 1 : 0) - slpK) * Math.min(1, dt * 2.2); sitK += ((md === "sit" ? 1 : 0) - sitK) * Math.min(1, dt * 4);
       if (act) { act.stop(); act = null; bones.forEach((b, i) => { b.quaternion.copy(rest[i]); b.position.copy(restP[i]); }); }
       const BL = k => nm("mixamorig:" + k), cL = Math.cos(ph), cR = -cL, s2 = Math.max(sitK, slpK), jm = ud.jmp ? 1 : 0;
-      let axL = sw * 0.5 * walkK + Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.0, axR = -sw * 0.5 * walkK - Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.0, azL = 0.1, azR = -0.1, bobY = 0, rollZ = 0, slideX = 0, hdX = 0, hdZ = 0, spB = 0, kneeB = 0;
+      let axL = sw * 0.5 * walkK + Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.6, axR = -sw * 0.5 * walkK - Math.sin(t * 1.4) * 0.05 * idle - slpK * 1.6, azL = 0.1, azR = -0.1, bobY = 0, rollZ = 0, slideX = 0, hdX = 0, hdZ = 0, spB = 0, kneeB = 0;
       const A = Math.sin(t * 13), A2 = Math.sin(t * 5), JP = Math.abs(Math.sin(t * 5));
       if (md === "drum") { axL = -0.9 + A * 0.45; axR = -0.9 - A * 0.45; hdX = Math.sin(t * 6.5) * 0.1; bobY = Math.abs(A) * 0.03; }
       else if (md === "scratch") { axL = -1.8 + Math.sin(t * 11) * 0.45; axR = -1.8 - Math.sin(t * 11) * 0.45; spB = 0.12; hdX = 0.1; }
@@ -5477,15 +5477,15 @@ function tetraRigBuild(g, s, T) {
       else if (md === "look") { hdX = -0.4; spB = -0.12; axL = 0.1; axR = 0.1; }
       else if (md === "build") { axL = -1.0 + Math.sin(t * 3) * 0.4; axR = -1.0 - Math.sin(t * 3) * 0.4; hdX = 0.25; spB = 0.15; }
       else if (md === "ride") { axL = -0.4; axR = -0.4; azL = 0.9; azR = -0.9; rollZ = Math.sin(t * 2.6) * 0.1; slideX = Math.sin(t * 1.6) * 0.35; bobY = Math.abs(Math.sin(t * 3.2)) * 0.05; kneeB = 0.5; }
-      const thL = -sw * 0.55 * walkK - s2 * 1.35 - jm * 0.9, thR = sw * 0.55 * walkK - s2 * 1.35 - jm * 0.9, knL = Math.max(0, cL) * 0.8 * walkK + s2 * 1.3 + jm * 0.9, knR = Math.max(0, cR) * 0.8 * walkK + s2 * 1.3 + jm * 0.9;
+      const thL = -sw * 0.55 * walkK - s2 * 1.35 - slpK * 0.7 - jm * 0.9, thR = sw * 0.55 * walkK - s2 * 1.35 - slpK * 0.7 - jm * 0.9, knL = Math.max(0, cL) * 0.8 * walkK + s2 * 1.3 + slpK * 0.7 + jm * 0.9, knR = Math.max(0, cR) * 0.8 * walkK + s2 * 1.3 + slpK * 0.7 + jm * 0.9;
       rotW(BL("LeftUpLeg"), thL - kneeB * 0.5, 0, 0); rotW(BL("RightUpLeg"), thR - kneeB * 0.5, 0, 0); rotW(BL("LeftLeg"), knL + kneeB, 0, 0); rotW(BL("RightLeg"), knR + kneeB, 0, 0);
       rotW(BL("LeftFoot"), -(thL + knL) * 0.9, 0, 0); rotW(BL("RightFoot"), -(thR + knR) * 0.9, 0, 0);
             rotW(BL("LeftArm"), axL, 0, azL); rotW(BL("RightArm"), axR, 0, azR);
-      rotW(hips, 0, 0, sw * 0.04 * walkK + rollZ); rotW(sp1, spB + Math.sin(t * 1.9) * 0.02 * idle + slpK * (0.25 + Math.sin(t * 1.4) * 0.03), 0, 0);
-      rotW(neck, slpK * 0.3 + (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
-      rotW(head, hdX + (slp ? 0.2 : Math.sin(ph * 2) * 0.05 * walkK), 0, hdZ + (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
+      rotW(hips, 0, 0, sw * 0.04 * walkK + rollZ); rotW(sp1, spB + Math.sin(t * 1.9) * 0.02 * idle + slpK * (0.95 + Math.sin(t * 1.4) * 0.03), 0, 0);
+      rotW(neck, slpK * 0.75 + (eat ? 0.45 + Math.sin(t * 6) * 0.1 : 0) + Math.sin(t * 1.3) * 0.03 * idle, idle * (eat || slp ? 0 : Math.sin(t * 0.45) * 0.25), 0);
+      rotW(head, hdX + (slp ? 0.45 : Math.sin(ph * 2) * 0.05 * walkK), 0, hdZ + (md === "play" ? Math.sin(t * 5) * 0.12 : 0) + Math.sin(t * 1.6) * 0.04 * idle);
       limbs(t, wag ? 1 : 0, 0, 0, slpK); setLids(t, slpK);
-      body.rotation.set(slpK * 0.08, yawK + spinA, sw * 0.05 * walkK + rollZ * 0.6 + slpK * (window.__lz == null ? 1.4 : window.__lz)); body.position.set(slideX + slpK * (window.__lx == null ? 0.9 : window.__lx), -1.4 + (window.__ly == null ? 0.45 : window.__ly) * slpK + bobY + Math.abs(sw) * 0.12 * walkK - slpK * 0.3 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
+      body.rotation.set(slpK * 0.08, yawK + spinA, sw * 0.05 * walkK + rollZ * 0.6 + slpK * (window.__lz == null ? 1.4 : window.__lz)); body.position.set(slideX + slpK * (window.__lx == null ? [0.1, 0.4, 0.9, 0.9][tetraStage().id] : window.__lx), -1.4 + (window.__ly == null ? 0.45 : window.__ly) * slpK + bobY + Math.abs(sw) * 0.12 * walkK - slpK * 0.3 - sitK * 0.12 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.3 : 0), 0); body.scale.set(1, 1 + Math.sin(t * 1.9) * 0.01, 1);
       return;
     }
     let y = Math.max(0, Math.sin(t * 2.2)) * 0.1 + (hop ? Math.abs(Math.sin((t - ud.hop) * 7)) * 0.5 : 0), ry = Math.sin(t * 0.8) * 0.4, rx = 0, rz = 0, sy = 1, mode = "idle";
@@ -11224,7 +11224,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-25 22:58";
+const BUILD_STAMP = "2026-11-25 23:18";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
