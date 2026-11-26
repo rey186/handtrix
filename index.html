@@ -5410,12 +5410,12 @@ async function tetraRigLoad() {
 }
 setTimeout(tetraRigLoad, 1500);
 function tetraRigBuild(g, s, T) {
-  const d = (s.rigKey === "j" && TETRA_RIGJ) ? TETRA_RIGJ : (s.rigKey === "c" && TETRA_RIGC) ? TETRA_RIGC : (s.rigKey === "l" && TETRA_RIGL) ? TETRA_RIGL : TETRA_RIG, mat = new T.MeshStandardMaterial({ map: d.map, normalMap: d.nmap, roughness: 0.6, metalness: 0, emissive: 0xffffff, emissiveMap: d.map, emissiveIntensity: (d === TETRA_RIGL ? 0.1 : 0.42) }); mat.normalScale.set(0.6, 0.6); s.mats.push(mat);
+  const d = (s.rigKey === "j" && TETRA_RIGJ) ? TETRA_RIGJ : (s.rigKey === "c" && TETRA_RIGC) ? TETRA_RIGC : (s.rigKey === "l" && TETRA_RIGL) ? TETRA_RIGL : TETRA_RIG, mat = new T.MeshStandardMaterial({ map: d.map, normalMap: d.nmap, roughness: 0.6, metalness: 0, emissive: 0xffffff, emissiveMap: d.map, emissiveIntensity: (d === TETRA_RIGL || d === TETRA_RIGJ ? 0.1 : 0.42) }); mat.normalScale.set(0.6, 0.6); s.mats.push(mat);
   const bones = d.nodes.map((n, i) => { const b = new T.Bone(); b.name = "n" + i; if (n.translation) b.position.fromArray(n.translation); if (n.rotation) b.quaternion.fromArray(n.rotation); if (n.scale) b.scale.fromArray(n.scale); return b; });
   d.nodes.forEach((n, i) => (n.children || []).forEach(c => bones[i].add(bones[c])));
   const jb = d.joints.map(i => bones[i]), skel = new T.Skeleton(jb, Array.from({ length: jb.length }, (_, k) => new T.Matrix4().fromArray(d.ibm, k * 16)));
   const mesh = new T.SkinnedMesh(d.geo.clone(), mat); mesh.frustumCulled = false; mesh.add(bones[d.root]); mesh.bind(skel, new T.Matrix4());
-  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE * (d === TETRA_RIGC ? 0.7 : d === TETRA_RIGJ ? 1.22 : d === TETRA_RIGL ? 1.13 : 1)); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
+  const body = new T.Group(), pivot = new T.Group(); pivot.scale.setScalar(RIG_SCALE * (d === TETRA_RIGC ? 0.7 : d === TETRA_RIGJ ? 0.84 : d === TETRA_RIGL ? 1.13 : 1)); pivot.position.y = RIG_Y; pivot.add(mesh); body.add(pivot); g.add(body);
   const byName = {}; d.nodes.forEach((n, i) => { byName[n.name] = bones[i]; }); const rest = bones.map(b => b.quaternion.clone()), restP = bones.map(b => b.position.clone());
   const nm = n => byName[n], head = nm("mixamorig:Head"), neck = nm("mixamorig:Neck"), sp1 = nm("mixamorig:Spine1"), hips = nm("mixamorig:Hips");
   const extra = d.nodes.map((n, i) => /^Bone_/.test(n.name || "") && d.joints.includes(i) ? i : -1).filter(i => i >= 0);
@@ -5427,7 +5427,7 @@ function tetraRigBuild(g, s, T) {
   const Qa = new T.Quaternion(), Qb = new T.Quaternion();
   const rotW = (b, x, y, z) => { if (!b) return; const i = bi.get(b), P = pwOf(i); E.set(x, y, z); Qa.setFromEuler(E); Qb.copy(P).invert().multiply(Qa).multiply(P); b.quaternion.copy(Qb).multiply(rest[i]); };
   // ---- párpados + orejas + cola (naturalidad) ----
-  const EYE = { g: [.095, 1.405, .225, .062, .052, .04, 0xa9cdf1], c: [.2, 1.12, .40, .1, .095, .07, 0x8ccbea], j: [.12, .775, .19, .09, .075, .06, 0x10bff9], l: [.09, 1.45, .135, .046, .046, .03, 0xa9c8ea] }[s.rigKey || "g"];
+  const EYE = { g: [.095, 1.405, .225, .062, .052, .04, 0xa9cdf1], c: [.2, 1.12, .40, .1, .095, .07, 0x8ccbea], j: [.11, 1.34, .24, .06, .055, .04, 0x9fcbe8], l: [.09, 1.45, .135, .046, .046, .03, 0xa9c8ea] }[s.rigKey || "g"];
   const headNode = d.nodes.findIndex(n => n.name === "mixamorig:Head"), hk = d.joints.indexOf(headNode), lids = [];
   if (EYE && hk >= 0 && head) {
     const ibm = new T.Matrix4().fromArray(d.ibm, hk * 16), lm = new T.MeshStandardMaterial({ color: EYE[6], emissive: EYE[6], emissiveIntensity: 0.4, roughness: 0.85, metalness: 0 }); s.mats.push(lm);
@@ -11224,7 +11224,7 @@ $("saveFile").onchange = e => { const f = e.target.files && e.target.files[0]; i
 $("savePaste").onclick = () => { const t = prompt("Pegá el código de progreso que copiaste:"); if (t) saveApply(t); };
 
 // ---------- Diagnóstico: informe para pegar en el chat ----------
-const BUILD_STAMP = "2026-11-26 08:59";
+const BUILD_STAMP = "2026-11-26 15:13";
 const diagEv = []; let diagFps = [], diagFrames = 0, diagLast = performance.now(), diagLong = 0, diagPrevT = 0;
 function diagLog(msg) { try { diagEv.push(((performance.now() / 1000) | 0) + "s " + String(msg).replace(/\s+/g, " ").slice(0, 90)); if (diagEv.length > 40) diagEv.shift(); } catch (e) { } }
 { const _sf = showFx; showFx = function (a, b) { diagLog("fx: " + a); return _sf.apply(this, arguments); }; }
