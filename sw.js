@@ -1,5 +1,5 @@
 // HANDTRIX service worker. Subí el número de VERSION cuando cambies este archivo.
-const VERSION = '20261126-2342';
+const VERSION = '20261127-0035';
 const CACHE = "handtrix-" + VERSION;
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
